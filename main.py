@@ -3,6 +3,7 @@ from tkinter import ttk
 import mysql.connector
 from mysql.connector import Error
 from tkinter import messagebox
+from scipy.optimize import linprog
 
 root = Tk()
 root.title('Casima Agrícola')
@@ -31,11 +32,220 @@ except Error as e:
     aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel se conectar ao banco de dados \nErro: " + str(e))
     print("Conexão com o banco não foi sucedida!")
 
+#-----------------------------------------------------------------------------------------
+
+def cria_menu():
+    #janela inicial
+    global menu_principal
+    global menu_banco
+    global menu_racao
+    menu_principal = Menu(root)
+    root.config(menu=menu_principal)
+
+    #criando os itens do menu
+    menu_banco = Menu(menu_principal, tearoff=0)
+    menu_principal.add_cascade(label="Banco", menu=menu_banco)
+    menu_banco.add_command(label="Funcionários", command=janela_funcionarios)
+    menu_banco.add_command(label="Animais", command=janela_animais)
+    menu_banco.add_command(label="Vacinas", command=janela_vacinas)
+    menu_banco.add_command(label="Vacinação", command=janela_vacinacao)
+    menu_banco.add_command(label="Estoque", command=janela_estoque)
+    menu_banco.add_command(label="Problemas Gestação")
+    menu_banco.add_command(label="Gestações")
+    menu_banco.add_command(label="Fornecedores")
+    menu_banco.add_command(label="Transações")
+
+
+    menu_racao = Menu(menu_principal, tearoff=0)
+    menu_principal.add_cascade(label="Ração", menu=menu_racao)
+    menu_racao.add_command(label="Mistura Ração", command=janela_simplex)
+    menu_racao.add_separator()
+    menu_racao.add_command(label="Sair", command=root.quit)
+
 
 #-----------------------------------------------------------------------------------------
 
+#pegando os itens do banco de dados e colocando na arvore
 def query_database(tabela):
-    return
+    #print(tabela)
+    try:
+        conexao = mysql.connector.connect(
+            host = "localhost",
+            user = "root",
+            passwd = "aneis1961",
+            database = "casima"
+        )
+        #criando o cursor
+        cursor = conexao.cursor()
+    except Error as e:
+        aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel se conectar ao banco de dados \nErro: " + str(e))
+        
+    global num
+    if tabela == "funcionarios":   
+        cursor.execute("SELECT * FROM funcionarios")
+        dados = cursor.fetchall()
+        #print(dados) 
+        num = 0
+        for itens in dados:
+            if num % 2 == 0:
+                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][1], dados[num][2], dados[num][3], dados[num][4], dados[num][5], dados[num][6]), tags=('evenrow', ))
+            else:
+                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][1], dados[num][2], dados[num][3], dados[num][4], dados[num][5], dados[num][6]), tags=('oddrow', ))
+            num += 1
+        
+    elif tabela == "animais":   
+        cursor.execute("SELECT * FROM animais")
+        dados = cursor.fetchall()
+        #print(dados)
+        num = 0
+        for itens in dados:
+            if num % 2 == 0:
+                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][1], dados[num][2], dados[num][3], dados[num][4], dados[num][5], dados[num][6]), tags=('evenrow', ))
+            else:
+                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][1], dados[num][2], dados[num][3], dados[num][4], dados[num][5], dados[num][6]), tags=('oddrow', ))
+            num += 1
+
+    elif tabela == "vacinas":   
+        cursor.execute("SELECT * FROM vacinas")
+        dados = cursor.fetchall()
+        #print(dados)
+        num = 0
+        for itens in dados:
+            if num % 2 == 0:
+                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][1], dados[num][2]), tags=('evenrow', ))
+            else:
+                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][1], dados[num][2]), tags=('oddrow', ))
+            num += 1
+
+    elif tabela == "vacinacao":   
+        cursor.execute("SELECT * FROM vacinacao")
+        dados = cursor.fetchall()
+        #print(dados)
+        num = 0
+        for itens in dados:
+            if num % 2 == 0:
+                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][1], dados[num][2], dados[num][3]), tags=('evenrow', ))
+            else:
+                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][1], dados[num][2], dados[num][3]), tags=('oddrow', ))
+            num += 1
+
+    elif tabela == "estoque":   
+        cursor.execute("SELECT * FROM estoque")
+        dados = cursor.fetchall()
+        #print(dados)
+        num = 0
+        for itens in dados:
+            if num % 2 == 0:
+                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][1], dados[num][2]), tags=('evenrow', ))
+            else:
+                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][1], dados[num][2]), tags=('oddrow', ))
+            num += 1
+    
+    
+    
+    #dando commit
+    conexao.commit()
+
+    #fechando a conexa
+    conexao.close()
+    
+
+#-----------------------------------------------------------------------------------------
+
+#atualizar dados existentes
+def atualizar_dados(tabela):
+    response = messagebox.askyesno(title="Update",  message="Confirmar Alterações?")
+    if response == 1:
+        
+        try:
+            conexao = mysql.connector.connect(
+            host = "localhost",
+            user = "root",
+            passwd = "aneis1961",
+            database = "casima"
+        )
+        except Error as e:
+            aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel se conectar ao banco de dados \nErro: " + str(e))
+        cursor = conexao.cursor()
+        if tabela == "animais":
+            print("sim")
+            #criando o cursor
+            
+            #atualizando o banco
+
+            tag = tag_entry.get()
+            tipo = tipo_entry.get()
+            data_nascimento = data_nascimento_entry.get()
+            peso = peso_entry.get()
+            sexo = sexo_entry.get()
+            mae_tag = mae_tag_entry.get()
+            pai_tag = pai_tag_entry.get()
+
+
+            sql = "UPDATE animais SET tag=%s, tipo=%s, data_nascimento=%s, peso =%s, sexo=%s, mae_tag=%s, pai_tag = %s WHERE (tag=%s) "
+            dados = (tag, tipo, data_nascimento, peso, sexo, mae_tag, pai_tag, tag)
+            print(dados)
+            try:
+                cursor.execute(sql, dados)
+                #cursor.execute("UPDATE animais SET tag=%s, tipo=%s, data_nascimento=%s, peso=%s, sexo=%s, mae_tag=%s, pai_tag=%s WHERE tag=%s", (tag_entry.get(), tipo_entry.get(), data_nascimento_entry.get(), peso_entry.get(), sexo_entry.get(), mae_tag_entry.get(), pai_tag_entry.get(), tag_entry.get()))
+                print("sim3")
+            except Error as e:
+                aviso = messagebox.showerror(title="ERRO", message="Não foi possível salvar as alterações \nErro: " + str(e))
+
+            #dando commit
+            conexao.commit
+
+            #fechando a conexao
+            conexao.close()
+            my_tree.delete(*my_tree.get_children())
+            query_database("animais")
+           
+    else:
+        aviso = messagebox.showinfo(title="Update", message="Nada foi alterado")
+    
+
+
+#-----------------------------------------------------------------------------------------
+
+#deletando item do banco
+def remover(tabela, pk, pk_entry):
+    response = messagebox.askyesno(title="Delete",  message="Confirmar Remoção?")
+    if response == 1:
+        
+        try:
+            conexao = mysql.connector.connect(
+            host = "localhost",
+            user = "root",
+            passwd = "aneis1961",
+            database = "casima"
+        )
+        except Error as e:
+            aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel se conectar ao banco de dados \nErro: " + str(e))
+        
+        cursor = conexao.cursor()
+        
+        
+        sql = "DELETE FROM %s WHERE %s=%s"
+        dados = (str(tabela), str(pk), str(pk_entry))
+        print(dados)
+        try:
+            cursor.execute(sql, dados)
+            #cursor.execute("DELETE FROM animais WHERE tag=3")
+        except Error as a:
+            aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel remover o item \nErro: " + str(a))
+        
+        
+        
+        #dando commit
+        conexao.commit
+
+        #fechando a conexao
+        conexao.close()
+        my_tree.delete(*my_tree.get_children())
+        query_database(tabela)
+    
+
+
 
 
 
@@ -43,32 +253,174 @@ def query_database(tabela):
 
 #-----------------------------------------------------------------------------------------
 
-def selecionar_dadosar_arvore():
-    cpf_entry.delete(0, END)
-    nome_entry.delete(0, END)
-    telefone_entry.delete(0, END)
-    endereco_entry.delete(0, END)
-    salario_entry.delete(0, END)
-    carteira_trabalho_entry.delete(0, END)
-    cargo_entry.delete(0, END)
+#adicionar dados ao banco
+def adicionar_ao_banco(tabela):
+    try:
+        conexao = mysql.connector.connect(
+            host = "localhost",
+            user = "root",
+            passwd = "aneis1961",
+            database = "casima"
+        )
+        #criando o cursor
+        cursor = conexao.cursor()
+    except Error as e:
+        aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel se conectar ao banco de dados \nErro: " + str(e))
+      
+    if tabela == "funcionarios":
+        sql = "INSERT INTO funcionarios (cpf, nome, telefone, endereco, salario, carteira_trabalho, cargo) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+        valores = (str(cpf_entry.get()), str(nome_entry.get()), str(telefone_entry.get()), str(endereco_entry.get()), str(salario_entry.get()), str(carteira_trabalho_entry.get()), str(cargo_entry.get()))
 
-    selecionado = my_tree.focus()
+        cursor.execute(sql, valores)
 
-    valor = my_tree.item(selecionado, 'values')
+        conexao.commit()
+        conexao.close()
+        my_tree.delete(*my_tree.get_children())
+        query_database("funcionarios")
 
-    cpf_entry.insert(0, valor[0])
-    nome_entry.insert(0, valor[1])
-    telefone_entry.insert(0, valor[2])
-    endereco_entry.insert(0, valor[3])
-    salario_entry.insert(0, valor[4])
-    carteira_trabalho_entry.insert(0, valor[5])
-    cargo_entry.insert(0, valor[6])
+    elif tabela == "animais":
+        sql = "INSERT INTO animais (tag, tipo, data_nascimento, peso, sexo, mae_tag, pai_tag) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+        valores = (str(tag_entry.get()), str(tipo_entry.get()), str(data_nascimento_entry.get()), str(peso_entry.get()), str(sexo_entry.get()), str(mae_tag_entry.get()), str(pai_tag_entry.get()))
+
+        cursor.execute(sql, valores)
+
+        conexao.commit()
+        conexao.close()
+        my_tree.delete(*my_tree.get_children())
+        query_database("animais")
+
+    elif tabela == "vacinas":
+        sql = "INSERT INTO vacinas (id, nome, reforco) VALUES (%s, %s, %s)"
+        valores = (str(id_vacina_entry.get()), str(nome_entry.get()), str(reforco_entry.get()))
+
+        cursor.execute(sql, valores)
+
+        conexao.commit()
+        conexao.close()
+        my_tree.delete(*my_tree.get_children())
+        query_database("vacinas")
+
+    elif tabela == "vacinacao":
+        sql = "INSERT INTO vacinacao (id, vacina_id, animais_tag, data) VALUES (%s, %s, %s, %s)"
+        valores = (str(id_vacinacao_entry.get()), str(vacinafk_id_entry.get()), str(animaisfk_tag_entry.get()), str(data_vacinacao_entry.get()))
+
+        cursor.execute(sql, valores)
+
+        conexao.commit()
+        conexao.close()
+        my_tree.delete(*my_tree.get_children())
+        query_database("vacinacao")
+
+    elif tabela == "estoque":
+        sql = "INSERT INTO estoque (id, item, quantidade) VALUES (%s, %s, %s)"
+        valores = (str(id_estoque_entry.get()), str(item_entry.get()), str(quantidade_entry.get()))
+
+        cursor.execute(sql, valores)
+
+        conexao.commit()
+        conexao.close()
+        my_tree.delete(*my_tree.get_children())
+        query_database("estoque")
+
+
+
+
+#-----------------------------------------------------------------------------------------
+
+#criando janela do simplex
+def janela_simplex():
+    for widgets in root.winfo_children():
+        widgets.destroy()
+    cria_menu()
+    root.geometry("500x300")
+
+
+    #função simplex
+    def simplex():
+        #indices da função de MINIMIZAR
+        C = [ingrediente1_entry.get(), ingrediente2_entry.get(), ingrediente3_entry.get()]
+        #Au é a matriz contendo os indices da equacoes condicionais do tipo MENOR IGUAL
+        Au = [
+            [-3, -1, -3],
+            [1, -1, 0]
+        ]
+        #vetor b das equações de MENOR IGUAL
+        Bu = [-6, 1]
+        #Ae é a matriz contendo os indices das equações condicionais do tipo IGUALDADE
+        Ae = [
+            [3, 2, 0]
+        ]
+        #Vetor b das equações de IGUALDADE
+        Be = [6]
+        resultado = linprog(C, A_ub=Au, b_ub=Bu, A_eq=Ae, b_eq=Be, bounds=None, method='simplex')
+        #print(resultado)
+        
+        #fun é o valor otimizado
+        # x: array são os valores de x que otimizão a função
+        #nit é o numero de interções
+
+        resposta_label = Label(frame_simplex, text="Quantidade de ingrediente 1 = " + str(resultado['x'][0]) + " Kg\nQuantidade de ingrediente 2 = " + str(resultado['x'][1]) + " Kg\nQuantidade de ingrediente 3 = " + str(resultado['x'][2]) + " Kg")
+        resposta_label.grid(row=3, column=0, columnspan=4, rowspan=3)
+
+    #criando frame do simplex
+    frame_simplex = Frame(root)
+    frame_simplex.pack(pady=10)
+
+    ingrediente1_label = Label(frame_simplex, text="Ingrediente 1")
+    ingrediente1_label.grid(row=0, column=0, pady=10, padx=(10,0))
+    ingrediente1_entry = Entry(frame_simplex)
+    ingrediente1_entry.grid(row=0, column=1, pady=10)
+
+    ingrediente2_label = Label(frame_simplex, text="Ingrediente 2")
+    ingrediente2_label.grid(row=0, column=2, pady=10, padx=(10,0))
+    ingrediente2_entry = Entry(frame_simplex)
+    ingrediente2_entry.grid(row=0, column=3, pady=10)
+
+    ingrediente3_label = Label(frame_simplex, text="Ingrediente 3")
+    ingrediente3_label.grid(row=1, column=0, pady=10, padx=(10,0))
+    ingrediente3_entry = Entry(frame_simplex)
+    ingrediente3_entry.grid(row=1, column=1, pady=10)
+
+    ingrediente4_label = Label(frame_simplex, text="Ingrediente 4")
+    ingrediente4_label.grid(row=1, column=2, pady=10, padx=(10,0))
+    ingrediente4_entry = Entry(frame_simplex)
+    ingrediente4_entry.grid(row=1, column=3, pady=10)
+
+    botao_calcular = Button(frame_simplex, text="Calcular", command=simplex)
+    botao_calcular.grid(row=2, column=0, pady=10, padx=10)
+    
+
+
 
 #-----------------------------------------------------------------------------------------
 
 #criando o frame para funcionarios
 def janela_funcionarios():
-    root.geometry("1150x500")
+    for widgets in root.winfo_children():
+        widgets.destroy()
+    cria_menu()
+    def selecionar_dados_arvore(e):
+        cpf_entry.delete(0, END)
+        nome_entry.delete(0, END)
+        telefone_entry.delete(0, END)
+        endereco_entry.delete(0, END)
+        salario_entry.delete(0, END)
+        carteira_trabalho_entry.delete(0, END)
+        cargo_entry.delete(0, END)
+
+        selecionado = my_tree.focus()
+
+        valor = my_tree.item(selecionado, 'values')
+
+        cpf_entry.insert(0, valor[0])
+        nome_entry.insert(0, valor[1])
+        telefone_entry.insert(0, valor[2])
+        endereco_entry.insert(0, valor[3])
+        salario_entry.insert(0, valor[4])
+        carteira_trabalho_entry.insert(0, valor[5])
+        cargo_entry.insert(0, valor[6])
+
+    root.geometry("1300x500")
     
     #adicionando estilo
     style = ttk.Style()
@@ -79,7 +431,7 @@ def janela_funcionarios():
     global my_tree
 
     #criando frame da treeview
-    frame_funcionarios = LabelFrame(root, text="Funcionários")
+    frame_funcionarios = Frame(root)
     frame_funcionarios.pack(pady=10)
 
     #criando o scroll da treeview
@@ -99,20 +451,20 @@ def janela_funcionarios():
     my_tree.column("CPF", width=140, anchor=W)
     my_tree.column("Nome", width=300, anchor=W)
     my_tree.column("Telefone", width=100, anchor=CENTER)
-    my_tree.column("Endereço", width=140, anchor=CENTER)
+    my_tree.column("Endereço", width=300, anchor=CENTER)
     my_tree.column("Salário", width=140, anchor=CENTER)
     my_tree.column("Carteira Trab", width=140, anchor=CENTER)
     my_tree.column("Cargo", width=140, anchor=CENTER)
 
     #criando as headings
     my_tree.heading("#0", text="", anchor=W)
-    my_tree.heading("CPF", text="Nome", anchor=W)
-    my_tree.heading("Nome", text="Sobrenome", anchor=W)
-    my_tree.heading("Telefone", text="ID", anchor=CENTER)
+    my_tree.heading("CPF", text="CPF", anchor=W)
+    my_tree.heading("Nome", text="Nome", anchor=W)
+    my_tree.heading("Telefone", text="Telefone", anchor=CENTER)
     my_tree.heading("Endereço", text="Endereço", anchor=CENTER)
-    my_tree.heading("Salário", text="Cidade", anchor=CENTER)
-    my_tree.heading("Carteira Trab", text="Estado", anchor=CENTER)
-    my_tree.heading("Cargo", text="CEP", anchor=CENTER)
+    my_tree.heading("Salário", text="Salário", anchor=CENTER)
+    my_tree.heading("Carteira Trab", text="Carteira Trab", anchor=CENTER)
+    my_tree.heading("Cargo", text="Cargo", anchor=CENTER)
 
 
 
@@ -127,40 +479,41 @@ def janela_funcionarios():
     data_frame.pack(fill="x", expand="yes", padx=20)
     global cpf_entry
     cpf_label = Label(data_frame, text="CPF")
-    cpf_label.grid(row=0, column=0, padx=10, pady=10)
+    cpf_label.grid(row=0, column=3, padx=10, pady=10)
     cpf_entry = Entry(data_frame)
-    cpf_entry.grid(row=0, column=1, padx=10, pady=10)
+    cpf_entry.grid(row=0, column=4, padx=10, pady=10)
     global nome_entry
     nome_label = Label(data_frame, text="Nome")
-    nome_label.grid(row=0, column=2, padx=10, pady=10)
-    nome_entry = Entry(data_frame)
-    nome_entry.grid(row=0, column=3, padx=10, pady=10)
+    nome_label.grid(row=0, column=0, padx=10, pady=10)
+    nome_entry = Entry(data_frame, width=50)
+    nome_entry.grid(row=0, column=1, padx=10, pady=10, columnspan=2)
     global telefone_entry
     telefone_label = Label(data_frame, text="Telefone")
-    telefone_label.grid(row=0, column=4, padx=10, pady=10)
+    telefone_label.grid(row=0, column=5, padx=10, pady=10)
     telefone_entry = Entry(data_frame)
-    telefone_entry.grid(row=0, column=5, padx=10, pady=10)
+    telefone_entry.grid(row=0, column=6, padx=10, pady=10)
     global endereco_entry
     endereco_label = Label(data_frame, text="Endereço")
     endereco_label.grid(row=1, column=0, padx=10, pady=10)
-    endereco_entry = Entry(data_frame)
-    endereco_entry.grid(row=1, column=1, padx=10, pady=10)
+    endereco_entry = Entry(data_frame, width=50)
+    endereco_entry.grid(row=1, column=1, padx=10, pady=10, columnspan=2)
     global salario_entry
     salario_label = Label(data_frame, text="Salário")
-    salario_label.grid(row=1, column=2, padx=10, pady=10)
+    salario_label.grid(row=1, column=3, padx=10, pady=10)
     salario_entry = Entry(data_frame)
-    salario_entry.grid(row=1, column=3, padx=10, pady=10)
+    salario_entry.grid(row=1, column=4, padx=10, pady=10)
     global carteira_trabalho_entry
     carteira_trabalho_label = Label(data_frame, text="Carteira Trab")
-    carteira_trabalho_label.grid(row=1, column=4, padx=10, pady=10)
+    carteira_trabalho_label.grid(row=1, column=5, padx=10, pady=10)
     carteira_trabalho_entry = Entry(data_frame)
-    carteira_trabalho_entry.grid(row=1, column=5, padx=10, pady=10)
+    carteira_trabalho_entry.grid(row=1, column=6, padx=10, pady=10)
     global cargo_entry
     cargo_label = Label(data_frame, text="Cargo")
-    cargo_label.grid(row=1, column=6, padx=10, pady=10)
+    cargo_label.grid(row=1, column=7, padx=10, pady=10)
     cargo_entry = Entry(data_frame)
-    cargo_entry.grid(row=1, column=7, padx=10, pady=10)
+    cargo_entry.grid(row=1, column=8, padx=10, pady=10)
     
+    query_database("funcionarios")
 
     #adicionando botões
     button_frame = LabelFrame(root, text="Ações")
@@ -169,10 +522,10 @@ def janela_funcionarios():
     update_button = Button(button_frame, text="Atualizar")
     update_button.grid(row=0 , column=0 , padx=10, pady=10)
 
-    add_button = Button(button_frame, text="Adicionar")
+    add_button = Button(button_frame, text="Adicionar", command=lambda:adicionar_ao_banco("funcionarios"))
     add_button.grid(row=0 , column=1 , padx=10, pady=10)
 
-    remove_all_button = Button(button_frame, text="Remover")
+    remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("funcionarios","cpf", str(cpf_entry.get())))
     remove_all_button.grid(row=0 , column=2 , padx=10, pady=10)
 
 
@@ -180,38 +533,500 @@ def janela_funcionarios():
     clear_box_button.grid(row=0 , column=7 , padx=10, pady=10)
 
     #bind th treeview
-    my_tree.bind("<ButtonRelease-1>", selecionar_dadosar_arvore)
+    my_tree.bind("<ButtonRelease-1>", selecionar_dados_arvore)
+
+#-----------------------------------------------------------------------------------------
+
+#criando a janela para tabela animais
+def janela_animais():
+    for widgets in root.winfo_children():
+        widgets.destroy()
+    cria_menu()
+    def selecionar_dados_arvore(e):
+        tag_entry.delete(0, END)
+        tipo_entry.delete(0, END)
+        data_nascimento_entry.delete(0, END)
+        peso_entry.delete(0, END)
+        sexo_entry.delete(0, END)
+        mae_tag_entry.delete(0, END)
+        pai_tag_entry.delete(0, END)
+
+        selecionado = my_tree.focus()
+
+        valor = my_tree.item(selecionado, 'values')
+
+        tag_entry.insert(0, valor[0])
+        tipo_entry.insert(0, valor[1])
+        data_nascimento_entry.insert(0, valor[2])
+        peso_entry.insert(0, valor[3])
+        sexo_entry.insert(0, valor[4])
+        mae_tag_entry.insert(0, valor[5])
+        pai_tag_entry.insert(0, valor[6])
+
+    root.geometry("1030x500")
+    
+    #adicionando estilo
+    style = ttk.Style()
+    style.theme_use('default')
+    style.configure("Treeview", background="#D3D3D3", foreground="black", rowheight=25, fieldbackground="#D3D3D3")
+    style.map('Treeview', background=[('selected', "#347083")])
+
+    global my_tree
+
+    #criando frame da treeview
+    frame_animais = Frame(root)
+    frame_animais.pack(pady=10)
+
+    #criando o scroll da treeview
+    tree_scroll = Scrollbar(frame_animais)
+    tree_scroll.pack(side=RIGHT, fill=Y)
+
+    #criando a treeview
+    my_tree = ttk.Treeview(frame_animais, yscrollcommand=tree_scroll.set, selectmode="extended")
+    my_tree.pack()
+
+    #configurando o scroll
+    tree_scroll.config(command=my_tree.yview)
+
+    #difinindo as colunas
+    my_tree['columns'] = ("TAG", "Tipo", "Nascimento", "Peso", "Sexo", "Mãe", "Pai")
+    my_tree.column("#0", width=0, stretch=NO)
+    my_tree.column("TAG", width=140, anchor=W)
+    my_tree.column("Tipo", width=140, anchor=W)
+    my_tree.column("Nascimento", width=140, anchor=CENTER)
+    my_tree.column("Peso", width=140, anchor=CENTER)
+    my_tree.column("Sexo", width=140, anchor=CENTER)
+    my_tree.column("Mãe", width=140, anchor=CENTER)
+    my_tree.column("Pai", width=140, anchor=CENTER)
+
+    #criando as headings
+    my_tree.heading("#0", text="", anchor=W)
+    my_tree.heading("TAG", text="TAG", anchor=W)
+    my_tree.heading("Tipo", text="Tipo", anchor=W)
+    my_tree.heading("Nascimento", text="Nascimento", anchor=CENTER)
+    my_tree.heading("Peso", text="Peso", anchor=CENTER)
+    my_tree.heading("Sexo", text="Sexo", anchor=CENTER)
+    my_tree.heading("Mãe", text="Mãe", anchor=CENTER)
+    my_tree.heading("Pai", text="Pai", anchor=CENTER)
 
 
 
+    #alternando as cores das linhas
+    my_tree.tag_configure('oddrow', background="white")
+    my_tree.tag_configure('evenrow', background="lightblue")
 
+
+
+    #adicionando as caixas de entrada
+    data_frame = LabelFrame(root, text="Animais")
+    data_frame.pack(fill="x", expand="yes", padx=20)
+    global tag_entry
+    tag_label = Label(data_frame, text="TAG")
+    tag_label.grid(row=0, column=0, padx=10, pady=10)
+    tag_entry = Entry(data_frame)
+    tag_entry.grid(row=0, column=1, padx=10, pady=10)
+    global tipo_entry
+    tipo_label = Label(data_frame, text="Tipo")
+    tipo_label.grid(row=0, column=2, padx=10, pady=10)
+    tipo_entry = Entry(data_frame)
+    tipo_entry.grid(row=0, column=3, padx=10, pady=10)
+    global data_nascimento_entry
+    data_nascimento_label = Label(data_frame, text="Data Nascimento")
+    data_nascimento_label.grid(row=0, column=4, padx=10, pady=10)
+    data_nascimento_entry = Entry(data_frame)
+    data_nascimento_entry.grid(row=0, column=5, padx=10, pady=10)
+    global peso_entry
+    peso_label = Label(data_frame, text="Peso")
+    peso_label.grid(row=1, column=0, padx=10, pady=10)
+    peso_entry = Entry(data_frame)
+    peso_entry.grid(row=1, column=1, padx=10, pady=10)
+    global sexo_entry
+    sexo_label = Label(data_frame, text="Sexo")
+    sexo_label.grid(row=1, column=2, padx=10, pady=10)
+    sexo_entry = Entry(data_frame)
+    sexo_entry.grid(row=1, column=3, padx=10, pady=10)
+    global mae_tag_entry
+    mae_tag_label = Label(data_frame, text="Mãe")
+    mae_tag_label.grid(row=1, column=4, padx=10, pady=10)
+    mae_tag_entry = Entry(data_frame)
+    mae_tag_entry.grid(row=1, column=5, padx=10, pady=10)
+    global pai_tag_entry
+    pai_tag_label = Label(data_frame, text="Pai")
+    pai_tag_label.grid(row=1, column=6, padx=10, pady=10)
+    pai_tag_entry = Entry(data_frame)
+    pai_tag_entry.grid(row=1, column=7, padx=10, pady=10)
+    
+    query_database("animais")
+
+    #adicionando botões
+    button_frame = LabelFrame(root, text="Ações")
+    button_frame.pack(fill="x", expand="yes", padx=20)
+
+    update_button = Button(button_frame, text="Atualizar", command=lambda:atualizar_dados("animais"))
+    update_button.grid(row=0 , column=0 , padx=10, pady=10)
+
+    add_button = Button(button_frame, text="Adicionar", command=lambda:adicionar_ao_banco("animais"))
+    add_button.grid(row=0 , column=1 , padx=10, pady=10)
+
+    remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("animais","tag", tag_entry.get()))
+    remove_all_button.grid(row=0 , column=2 , padx=10, pady=10)
+
+
+    clear_box_button = Button(button_frame, text="Limpar")
+    clear_box_button.grid(row=0 , column=7 , padx=10, pady=10)
+
+    #bind th treeview
+    my_tree.bind("<ButtonRelease-1>", selecionar_dados_arvore)
 
 
 #-----------------------------------------------------------------------------------------
 
-#janela inicial
-menu_principal = Menu(root)
-root.config(menu=menu_principal)
+#criando janela de vacinas
+def janela_vacinas():
+    for widgets in root.winfo_children():
+        widgets.destroy()
+    cria_menu()
+    def selecionar_dados_arvore(e):
+        id_vacina_entry.delete(0, END)
+        nome_entry.delete(0, END)
+        reforco_entry.delete(0, END)
+        
 
-#criando os itens do menu
-menu_banco = Menu(menu_principal, tearoff=0)
-menu_principal.add_cascade(label="Banco", menu=menu_banco)
-menu_banco.add_command(label="Funcionários", command=janela_funcionarios)
-menu_banco.add_command(label="Animais")
-menu_banco.add_command(label="Vacinas")
-menu_banco.add_command(label="Vacinação")
-menu_banco.add_command(label="Estoque")
-menu_banco.add_command(label="Problemas Gestação")
-menu_banco.add_command(label="Gestações")
-menu_banco.add_command(label="Fornecedores")
-menu_banco.add_command(label="Transações")
+        selecionado = my_tree.focus()
+
+        valor = my_tree.item(selecionado, 'values')
+
+        id_vacina_entry.insert(0, valor[0])
+        nome_entry.insert(0, valor[1])
+        reforco_entry.insert(0, valor[2])
+        
+
+    root.geometry("910x470")
+    
+    #adicionando estilo
+    style = ttk.Style()
+    style.theme_use('default')
+    style.configure("Treeview", background="#D3D3D3", foreground="black", rowheight=25, fieldbackground="#D3D3D3")
+    style.map('Treeview', background=[('selected', "#347083")])
+
+    global my_tree
+
+    #criando frame da treeview
+    frame_vacinas = Frame(root)
+    frame_vacinas.pack(pady=10)
+
+    #criando o scroll da treeview
+    tree_scroll = Scrollbar(frame_vacinas)
+    tree_scroll.pack(side=RIGHT, fill=Y)
+
+    #criando a treeview
+    my_tree = ttk.Treeview(frame_vacinas, yscrollcommand=tree_scroll.set, selectmode="extended")
+    my_tree.pack()
+
+    #configurando o scroll
+    tree_scroll.config(command=my_tree.yview)
+
+    #difinindo as colunas
+    my_tree['columns'] = ("ID", "Nome", "Reforço")
+    my_tree.column("#0", width=0, stretch=NO)
+    my_tree.column("ID", width=80, anchor=W)
+    my_tree.column("Nome", width=150, anchor=W)
+    my_tree.column("Reforço", width=600, anchor=CENTER)
+    
+
+    #criando as headings
+    my_tree.heading("#0", text="", anchor=W)
+    my_tree.heading("ID", text="ID", anchor=W)
+    my_tree.heading("Nome", text="Nome", anchor=W)
+    my_tree.heading("Reforço", text="Reforço", anchor=CENTER)
+    
 
 
-menu_racao = Menu(menu_principal, tearoff=0)
-menu_principal.add_cascade(label="Ração", menu=menu_racao)
-menu_racao.add_command(label="Mistura Ração")
-menu_racao.add_separator()
-menu_racao.add_command(label="Sair", command=root.quit)
 
+    #alternando as cores das linhas
+    my_tree.tag_configure('oddrow', background="white")
+    my_tree.tag_configure('evenrow', background="lightblue")
+
+
+
+    #adicionando as caixas de entrada
+    data_frame = LabelFrame(root, text="Vacinas")
+    data_frame.pack(fill="x", expand="yes", padx=20)
+    global id_vacina_entry
+    id_vacina_label = Label(data_frame, text="ID")
+    id_vacina_label.grid(row=0, column=0, padx=10, pady=10)
+    id_vacina_entry = Entry(data_frame)
+    id_vacina_entry.grid(row=0, column=1, padx=10, pady=10)
+    global nome_entry
+    nome_label = Label(data_frame, text="Nome")
+    nome_label.grid(row=0, column=2, padx=10, pady=10)
+    nome_entry = Entry(data_frame)
+    nome_entry.grid(row=0, column=3, padx=10, pady=10)
+    global reforco_entry
+    reforco_label = Label(data_frame, text="Reforço")
+    reforco_label.grid(row=0, column=4, padx=10, pady=10)
+    reforco_entry = Entry(data_frame, width=60)
+    reforco_entry.grid(row=0, column=5, padx=10, pady=10, columnspan=8)
+    
+    
+    query_database("vacinas")
+
+    #adicionando botões
+    button_frame = LabelFrame(root, text="Ações")
+    button_frame.pack(fill="x", expand="yes", padx=20)
+
+    update_button = Button(button_frame, text="Atualizar")
+    update_button.grid(row=0 , column=0 , padx=10, pady=10)
+
+    add_button = Button(button_frame, text="Adicionar", command=lambda:adicionar_ao_banco("vacinas"))
+    add_button.grid(row=0 , column=1 , padx=10, pady=10)
+
+    remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("vacinas","id", id_vacina_entry.get()))
+    remove_all_button.grid(row=0 , column=2 , padx=10, pady=10)
+
+
+    clear_box_button = Button(button_frame, text="Limpar")
+    clear_box_button.grid(row=0 , column=7 , padx=10, pady=10)
+
+    #bind th treeview
+    my_tree.bind("<ButtonRelease-1>", selecionar_dados_arvore)
+
+#-----------------------------------------------------------------------------------------
+
+#criando a janela para tabela de vacinacao
+def janela_vacinacao():
+    for widgets in root.winfo_children():
+        widgets.destroy()
+    cria_menu()
+    def selecionar_dados_arvore(e):
+        id_vacinacao_entry.delete(0, END)
+        vacinafk_id_entry.delete(0, END)
+        animaisfk_tag_entry.delete(0, END)
+        data_vacinacao_entry.delete(0, END)
+        
+
+        selecionado = my_tree.focus()
+
+        valor = my_tree.item(selecionado, 'values')
+
+        id_vacinacao_entry.insert(0, valor[0])
+        vacinafk_id_entry.insert(0, valor[1])
+        animaisfk_tag_entry.insert(0, valor[2])
+        data_vacinacao_entry.insert(0, valor[3])
+        
+
+    root.geometry("1000x500")
+    
+    #adicionando estilo
+    style = ttk.Style()
+    style.theme_use('default')
+    style.configure("Treeview", background="#D3D3D3", foreground="black", rowheight=25, fieldbackground="#D3D3D3")
+    style.map('Treeview', background=[('selected', "#347083")])
+
+    global my_tree
+
+    #criando frame da treeview
+    frame_vacinacao = Frame(root)
+    frame_vacinacao.pack(pady=10)
+
+    #criando o scroll da treeview
+    tree_scroll = Scrollbar(frame_vacinacao)
+    tree_scroll.pack(side=RIGHT, fill=Y)
+
+    #criando a treeview
+    my_tree = ttk.Treeview(frame_vacinacao, yscrollcommand=tree_scroll.set, selectmode="extended")
+    my_tree.pack()
+
+    #configurando o scroll
+    tree_scroll.config(command=my_tree.yview)
+
+    #difinindo as colunas
+    my_tree['columns'] = ("ID", "Vacina", "Animal", "Data")
+    my_tree.column("#0", width=0, stretch=NO)
+    my_tree.column("ID", width=100, anchor=W)
+    my_tree.column("Vacina", width=180, anchor=W)
+    my_tree.column("Animal", width=140, anchor=CENTER)
+    my_tree.column("Data", width=140, anchor=CENTER)
+    
+
+    #criando as headings
+    my_tree.heading("#0", text="", anchor=W)
+    my_tree.heading("ID", text="ID", anchor=W)
+    my_tree.heading("Vacina", text="Vacina", anchor=W)
+    my_tree.heading("Animal", text="Animal", anchor=CENTER)
+    my_tree.heading("Data", text="Data", anchor=CENTER)
+    
+
+
+
+    #alternando as cores das linhas
+    my_tree.tag_configure('oddrow', background="white")
+    my_tree.tag_configure('evenrow', background="lightblue")
+
+
+
+    #adicionando as caixas de entrada
+    data_frame = LabelFrame(root, text="Vacinação")
+    data_frame.pack(fill="x", expand="yes", padx=20)
+    global id_vacinacao_entry
+    id_vacinacao_label = Label(data_frame, text="ID")
+    id_vacinacao_label.grid(row=0, column=0, padx=10, pady=10)
+    id_vacinacao_entry = Entry(data_frame)
+    id_vacinacao_entry.grid(row=0, column=1, padx=10, pady=10)
+    global vacinafk_id_entry
+    vacinafk_id_label = Label(data_frame, text="Vacina")
+    vacinafk_id_label.grid(row=0, column=2, padx=10, pady=10)
+    vacinafk_id_entry = Entry(data_frame)
+    vacinafk_id_entry.grid(row=0, column=3, padx=10, pady=10)
+    global animaisfk_tag_entry
+    animaisfk_tag_label = Label(data_frame, text="Animal")
+    animaisfk_tag_label.grid(row=0, column=4, padx=10, pady=10)
+    animaisfk_tag_entry = Entry(data_frame)
+    animaisfk_tag_entry.grid(row=0, column=5, padx=10, pady=10)
+    global data_vacinacao_entry
+    data_vacinacao_label = Label(data_frame, text="Data")
+    data_vacinacao_label.grid(row=0, column=6, padx=10, pady=10)
+    data_vacinacao_entry = Entry(data_frame)
+    data_vacinacao_entry.grid(row=0, column=7, padx=10, pady=10)
+    
+    
+    query_database("vacinacao")
+
+    #adicionando botões
+    button_frame = LabelFrame(root, text="Ações")
+    button_frame.pack(fill="x", expand="yes", padx=20)
+
+    update_button = Button(button_frame, text="Atualizar", command=lambda:atualizar_dados("vacinacao"))
+    update_button.grid(row=0 , column=0 , padx=10, pady=10)
+
+    add_button = Button(button_frame, text="Adicionar", command=lambda:adicionar_ao_banco("vacinacao"))
+    add_button.grid(row=0 , column=1 , padx=10, pady=10)
+
+    remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("vacinacao","id", id_vacinacao_entry.get()))
+    remove_all_button.grid(row=0 , column=2 , padx=10, pady=10)
+
+
+    clear_box_button = Button(button_frame, text="Limpar")
+    clear_box_button.grid(row=0 , column=7 , padx=10, pady=10)
+
+    #bind th treeview
+    my_tree.bind("<ButtonRelease-1>", selecionar_dados_arvore)
+
+#-----------------------------------------------------------------------------------------
+
+#criando o frame para funcionarios
+def janela_estoque():
+    for widgets in root.winfo_children():
+        widgets.destroy()
+    cria_menu()
+    def selecionar_dados_arvore(e):
+        id_estoque_entry.delete(0, END)
+        item_entry.delete(0, END)
+        quantidade_entry.delete(0, END)
+        
+
+        selecionado = my_tree.focus()
+
+        valor = my_tree.item(selecionado, 'values')
+
+        id_estoque_entry.insert(0, valor[0])
+        item_entry.insert(0, valor[1])
+        quantidade_entry.insert(0, valor[2])
+        
+
+    root.geometry("900x500")
+    
+    #adicionando estilo
+    style = ttk.Style()
+    style.theme_use('default')
+    style.configure("Treeview", background="#D3D3D3", foreground="black", rowheight=25, fieldbackground="#D3D3D3")
+    style.map('Treeview', background=[('selected', "#347083")])
+
+    global my_tree
+
+    #criando frame da treeview
+    frame_estoque = Frame(root)
+    frame_estoque.pack(pady=10)
+
+    #criando o scroll da treeview
+    tree_scroll = Scrollbar(frame_estoque)
+    tree_scroll.pack(side=RIGHT, fill=Y)
+
+    #criando a treeview
+    my_tree = ttk.Treeview(frame_estoque, yscrollcommand=tree_scroll.set, selectmode="extended")
+    my_tree.pack()
+
+    #configurando o scroll
+    tree_scroll.config(command=my_tree.yview)
+
+    #difinindo as colunas
+    my_tree['columns'] = ("ID", "Item", "Quantidade")
+    my_tree.column("#0", width=0, stretch=NO)
+    my_tree.column("ID", width=140, anchor=W)
+    my_tree.column("Item", width=300, anchor=W)
+    my_tree.column("Quantidade", width=100, anchor=CENTER)
+    
+
+    #criando as headings
+    my_tree.heading("#0", text="", anchor=W)
+    my_tree.heading("ID", text="ID", anchor=W)
+    my_tree.heading("Item", text="Item", anchor=W)
+    my_tree.heading("Quantidade", text="Quantidade", anchor=CENTER)
+    
+
+
+    #alternando as cores das linhas
+    my_tree.tag_configure('oddrow', background="white")
+    my_tree.tag_configure('evenrow', background="lightblue")
+
+
+
+    #adicionando as caixas de entrada
+    data_frame = LabelFrame(root, text="Estoque")
+    data_frame.pack(fill="x", expand="yes", padx=20)
+    global id_estoque_entry
+    id_estoque_label = Label(data_frame, text="ID")
+    id_estoque_label.grid(row=0, column=0, padx=10, pady=10)
+    id_estoque_entry = Entry(data_frame)
+    id_estoque_entry.grid(row=0, column=2, padx=10, pady=10)
+    global item_entry
+    item_label = Label(data_frame, text="Item")
+    item_label.grid(row=0, column=3, padx=10, pady=10)
+    item_entry = Entry(data_frame, width=50)
+    item_entry.grid(row=0, column=4, padx=10, pady=10, columnspan=2)
+    global quantidade_entry
+    quantidade_label = Label(data_frame, text="Quantidade")
+    quantidade_label.grid(row=0, column=6, padx=10, pady=10)
+    quantidade_entry = Entry(data_frame)
+    quantidade_entry.grid(row=0, column=7, padx=10, pady=10)
+    
+    
+    query_database("estoque")
+
+    #adicionando botões
+    button_frame = LabelFrame(root, text="Ações")
+    button_frame.pack(fill="x", expand="yes", padx=20)
+
+    update_button = Button(button_frame, text="Atualizar")
+    update_button.grid(row=0 , column=0 , padx=10, pady=10)
+
+    add_button = Button(button_frame, text="Adicionar", command=lambda:adicionar_ao_banco("estoque"))
+    add_button.grid(row=0 , column=1 , padx=10, pady=10)
+
+    remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("estoque","id", id_estoque_entry.get()))
+    remove_all_button.grid(row=0 , column=2 , padx=10, pady=10)
+
+
+    clear_box_button = Button(button_frame, text="Limpar")
+    clear_box_button.grid(row=0 , column=7 , padx=10, pady=10)
+
+    #bind th treeview
+    my_tree.bind("<ButtonRelease-1>", selecionar_dados_arvore)
+
+#-----------------------------------------------------------------------------------------
+
+
+
+cria_menu()
 
 root.mainloop()
