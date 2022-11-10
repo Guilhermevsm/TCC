@@ -1,3 +1,5 @@
+Comandos utilizados para criar as tabelas do banco de dados
+
 cursor.execute("""CREATE TABLE IF NOT EXISTS animais (
         tag INT(10) NOT NULL PRIMARY KEY,
         tipo VARCHAR(255),
