@@ -53,7 +53,7 @@ def cria_menu():
     menu_banco.add_command(label="Problemas Gestação", command=janela_problemas_gestacao)
     menu_banco.add_command(label="Gestações", command=janela_gestacao)
     menu_banco.add_command(label="Fornecedores", command=janela_fornecedores)
-    menu_banco.add_command(label="Transações")
+    menu_banco.add_command(label="Transações", command=janela_transacao)
 
 
     menu_racao = Menu(menu_principal, tearoff=0)
@@ -177,9 +177,20 @@ def query_database(tabela):
             else:
                 my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][1], dados[num][2], dados[num][3], dados[num][4]), tags=('oddrow', ))
             num += 1
+
+    elif tabela == "transacao":   
+        cursor.execute("SELECT * FROM transacao")
+        dados = cursor.fetchall()
+        #print(dados)
+        num = 0
+        for itens in dados:
+            if num % 2 == 0:
+                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][1], dados[num][2], dados[num][3], dados[num][4], dados[num][5]), tags=('evenrow', ))
+            else:
+                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][1], dados[num][2], dados[num][3], dados[num][4], dados[num][5]), tags=('oddrow', ))
+            num += 1
     
-    
-    
+
     #dando commit
     conexao.commit()
 
@@ -387,7 +398,16 @@ def adicionar_ao_banco(tabela):
         my_tree.delete(*my_tree.get_children())
         query_database("fornecedores")
 
+    elif tabela == "transacao":
+        sql = "INSERT INTO transacao (id, f_id, e_id, data, quantidade, valor_unitario) VALUES (%s, %s, %s, %s, %s, %s)"
+        valores = (str(id_transacao_entry.get()), str(f_id_transacao_entry.get()), str(e_id_transacao_entry.get()), str(data_transacao_entry.get()), str(quantidade_transacao_entry.get()), str(valor_unitario_transacao_entry.get()))
 
+        cursor.execute(sql, valores)
+
+        conexao.commit()
+        conexao.close()
+        my_tree.delete(*my_tree.get_children())
+        query_database("transacao")
 
 
 #-----------------------------------------------------------------------------------------
@@ -1449,9 +1469,141 @@ def janela_fornecedores():
 
 #-----------------------------------------------------------------------------------------
 
+#criando a janela para tabela transação
+def janela_transacao():
+    for widgets in root.winfo_children():
+        widgets.destroy()
+    cria_menu()
+    def selecionar_dados_arvore(e):
+        id_transacao_entry.delete(0, END)
+        f_id_transacao_entry.delete(0, END)
+        e_id_transacao_entry.delete(0, END)
+        data_transacao_entry.delete(0, END)
+        quantidade_transacao_entry.delete(0, END)
+        valor_unitario_transacao_entry.delete(0, END)
+
+        selecionado = my_tree.focus()
+
+        valor = my_tree.item(selecionado, 'values')
+
+        id_transacao_entry.insert(0, valor[0])
+        f_id_transacao_entry.insert(0, valor[1])
+        e_id_transacao_entry.insert(0, valor[2])
+        data_transacao_entry.insert(0, valor[3])
+        quantidade_transacao_entry.insert(0, valor[4])
+        valor_unitario_transacao_entry.insert(0, valor[5])
+        
+
+    root.geometry("1030x500")
+    
+    #adicionando estilo
+    style = ttk.Style()
+    style.theme_use('default')
+    style.configure("Treeview", background="#D3D3D3", foreground="black", rowheight=25, fieldbackground="#D3D3D3")
+    style.map('Treeview', background=[('selected', "#347083")])
+
+    global my_tree
+
+    #criando frame da treeview
+    frame_transacao = Frame(root)
+    frame_transacao.pack(pady=10)
+
+    #criando o scroll da treeview
+    tree_scroll = Scrollbar(frame_transacao)
+    tree_scroll.pack(side=RIGHT, fill=Y)
+
+    #criando a treeview
+    my_tree = ttk.Treeview(frame_transacao, yscrollcommand=tree_scroll.set, selectmode="extended")
+    my_tree.pack()
+
+    #configurando o scroll
+    tree_scroll.config(command=my_tree.yview)
+
+    #difinindo as colunas
+    my_tree['columns'] = ("ID", "Fornecedor", "Item", "Data", "Quantidade", "Valor Unitário")
+    my_tree.column("#0", width=0, stretch=NO)
+    my_tree.column("ID", width=140, anchor=W)
+    my_tree.column("Fornecedor", width=140, anchor=W)
+    my_tree.column("Item", width=140, anchor=CENTER)
+    my_tree.column("Data", width=140, anchor=CENTER)
+    my_tree.column("Quantidade", width=140, anchor=CENTER)
+    my_tree.column("Valor Unitário", width=140, anchor=CENTER)
+    
+
+    #criando as headings
+    my_tree.heading("#0", text="", anchor=W)
+    my_tree.heading("ID", text="ID", anchor=W)
+    my_tree.heading("Fornecedor", text="Fornecedor", anchor=W)
+    my_tree.heading("Item", text="Item", anchor=CENTER)
+    my_tree.heading("Data", text="Data", anchor=CENTER)
+    my_tree.heading("Quantidade", text="Quantidade", anchor=CENTER)
+    my_tree.heading("Valor Unitário", text="Valor Unitário", anchor=CENTER)
 
 
+    #alternando as cores das linhas
+    my_tree.tag_configure('oddrow', background="white")
+    my_tree.tag_configure('evenrow', background="lightblue")
 
+
+    #adicionando as caixas de entrada
+    data_frame = LabelFrame(root, text="Animais")
+    data_frame.pack(fill="x", expand="yes", padx=20)
+    global id_transacao_entry
+    id_transacao_label = Label(data_frame, text="ID")
+    id_transacao_label.grid(row=0, column=0, padx=10, pady=10)
+    id_transacao_entry = Entry(data_frame)
+    id_transacao_entry.grid(row=0, column=1, padx=10, pady=10)
+    global f_id_transacao_entry
+    f_id_transacao_label = Label(data_frame, text="Fornecedor")
+    f_id_transacao_label.grid(row=0, column=2, padx=10, pady=10)
+    f_id_transacao_entry = Entry(data_frame)
+    f_id_transacao_entry.grid(row=0, column=3, padx=10, pady=10)
+    global e_id_transacao_entry
+    e_id_transacao_label = Label(data_frame, text="Item")
+    e_id_transacao_label.grid(row=0, column=4, padx=10, pady=10)
+    e_id_transacao_entry = Entry(data_frame)
+    e_id_transacao_entry.grid(row=0, column=5, padx=10, pady=10)
+    global data_transacao_entry
+    data_transacao_label = Label(data_frame, text="Data")
+    data_transacao_label.grid(row=1, column=0, padx=10, pady=10)
+    data_transacao_entry = Entry(data_frame)
+    data_transacao_entry.grid(row=1, column=1, padx=10, pady=10)
+    global quantidade_transacao_entry
+    quantidade_transacao_label = Label(data_frame, text="Quantidade")
+    quantidade_transacao_label.grid(row=1, column=2, padx=10, pady=10)
+    quantidade_transacao_entry = Entry(data_frame)
+    quantidade_transacao_entry.grid(row=1, column=3, padx=10, pady=10)
+    global valor_unitario_transacao_entry
+    valor_unitario_transacao_label = Label(data_frame, text="Valor Unitário")
+    valor_unitario_transacao_label.grid(row=1, column=4, padx=10, pady=10)
+    valor_unitario_transacao_entry = Entry(data_frame)
+    valor_unitario_transacao_entry.grid(row=1, column=5, padx=10, pady=10)
+    
+    
+    query_database("transacao")
+
+    #adicionando botões
+    button_frame = LabelFrame(root, text="Ações")
+    button_frame.pack(fill="x", expand="yes", padx=20)
+
+    update_button = Button(button_frame, text="Atualizar", command=lambda:atualizar_dados("transacao"))
+    update_button.grid(row=0 , column=0 , padx=10, pady=10)
+
+    add_button = Button(button_frame, text="Adicionar", command=lambda:adicionar_ao_banco("transacao"))
+    add_button.grid(row=0 , column=1 , padx=10, pady=10)
+
+    remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("transacao","id", id_transacao_entry.get()))
+    remove_all_button.grid(row=0 , column=2 , padx=10, pady=10)
+
+
+    clear_box_button = Button(button_frame, text="Limpar")
+    clear_box_button.grid(row=0 , column=7 , padx=10, pady=10)
+
+    #bind th treeview
+    my_tree.bind("<ButtonRelease-1>", selecionar_dados_arvore)
+
+
+#-----------------------------------------------------------------------------------------
 
 
 cria_menu()
