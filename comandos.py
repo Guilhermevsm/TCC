@@ -1,3 +1,6 @@
+#arquivo usado para comandos sql
+
+
 import mysql.connector
 from mysql.connector import Error
 
@@ -13,7 +16,7 @@ try:
     cursor = conexao.cursor()
     
 
-    cursor.execute("UPDATE animais SET tipo = 'Bovino' WHERE tag = 2")
+    cursor.execute("CREATE VIEW vacinados AS SELECT animais.tag, vacinacao.vacina_id, vacinas.nome FROM animais, vacinacao, vacinas WHERE animais.tag = vacinacao.animais_tag AND vacinacao.vacina_id = vacinas.id")
 
 
     #dando commit

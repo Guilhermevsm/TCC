@@ -56,6 +56,10 @@ def cria_menu():
     menu_banco.add_command(label="Transações", command=janela_transacao)
 
 
+    menu_views = Menu(menu_principal, tearoff=0)
+    menu_principal.add_cascade(label="Views", menu=menu_views)
+    menu_views.add_command(label="Animais Vacinados", command=janela_vacinados)
+
     menu_racao = Menu(menu_principal, tearoff=0)
     menu_principal.add_cascade(label="Ração", menu=menu_racao)
     menu_racao.add_command(label="Mistura Ração", command=janela_simplex)
@@ -1603,6 +1607,39 @@ def janela_transacao():
     my_tree.bind("<ButtonRelease-1>", selecionar_dados_arvore)
 
 
+#-----------------------------------------------------------------------------------------
+
+#criando a janela para a view vacinados
+def janela_vacinados():
+    for widgets in root.winfo_children():
+        widgets.destroy()
+    cria_menu()
+    
+    vacinados_frame = Frame(root)
+    vacinados_frame.pack(padx=10, pady=10)
+
+    try:
+        conexao = mysql.connector.connect(
+            host = "localhost",
+            user = "root",
+            passwd = "aneis1961",
+            database = "casima"
+        )
+        #criando o cursor
+        cursor = conexao.cursor()
+    except Error as e:
+        aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel se conectar ao banco de dados \nErro: " + str(e))
+    
+    cursor.execute("SELECT * FROM vacinados")
+    resultado = cursor.fetchall()
+
+    for item in resultado:
+        print(item)
+
+    conexao.commit()
+    conexao.close()
+
+    
 #-----------------------------------------------------------------------------------------
 
 

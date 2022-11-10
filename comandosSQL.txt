@@ -80,3 +80,9 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS transacao (
         quantidade DECIMAL(10,2),
         valor_unitario DECIMAL(10,2)
         )""")  
+
+
+-----------------------------------------------------------------------------
+VIEWS
+
+cursor.execute("CREATE VIEW vacinados AS SELECT animais.tag, vacinacao.vacina_id, vacinas.nome FROM animais, vacinacao, vacinas WHERE animais.tag = vacinacao.animais_tag AND vacinacao.vacina_id = vacinas.id")
