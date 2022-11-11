@@ -1563,6 +1563,42 @@ def janela_vacinados():
     for widgets in root.winfo_children():
         widgets.destroy()
     cria_menu()
+
+    def selecionar_animal_vacinado(animal):
+        try:
+            conexao = mysql.connector.connect(
+                host = "localhost",
+                user = "root",
+                passwd = "aneis1961",
+                database = "casima"
+            )
+            #criando o cursor
+            cursor = conexao.cursor()
+        except Error as e:
+            aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel se conectar ao banco de dados \nErro: " + str(e))
+
+        try:
+            cursor.execute("SELECT * FROM vacinados WHERE tag = %s ", (animal, ))
+        except Error as e:
+            aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel se conectar ao banco de dados \nErro: " + str(e))
+            print("Conexão com o banco não foi sucedida!")
+        dados = cursor.fetchall()
+         
+        for item in my_tree.get_children():
+            my_tree.delete(item)
+        num = 0
+        for itens in dados:
+            if num % 2 == 0:
+                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][2], dados[num][3]), tags=('evenrow', ))
+            else:
+                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][2], dados[num][3]), tags=('oddrow', ))
+            num += 1
+
+        #dando commit
+        conexao.commit()
+
+        #fechando a conexa
+        conexao.close()
     
     vacinados_frame = Frame(root)
     vacinados_frame.pack(padx=10, pady=10)
@@ -1612,6 +1648,21 @@ def janela_vacinados():
     my_tree.tag_configure('evenrow', background="lightblue")
 
     query_database("vacinados")
+
+    #adicionando botões
+    selecinonar_frame = LabelFrame(root, text="Escolher")
+    selecinonar_frame.pack(fill="x", expand="yes", padx=20)
+    my_label = Label(selecinonar_frame, text="Escolher Animal")
+    my_label.grid(row=0, column=0, pady=10)
+    vacinados_tag_entry = Entry(selecinonar_frame)
+    vacinados_tag_entry.grid(row=0, column=1, pady=10)
+
+    #adicionando botões
+    button_frame = LabelFrame(root, text="Ações")
+    button_frame.pack(fill="x", expand="yes", padx=20)
+
+    update_button = Button(button_frame, text="Selecionar", command=lambda:selecionar_animal_vacinado(vacinados_tag_entry.get()))
+    update_button.grid(row=0 , column=0 , padx=10, pady=10)
 
     conexao.commit()
     conexao.close()
