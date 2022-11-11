@@ -55,7 +55,6 @@ def cria_menu():
     menu_banco.add_command(label="Fornecedores", command=janela_fornecedores)
     menu_banco.add_command(label="Transações", command=janela_transacao)
 
-
     menu_views = Menu(menu_principal, tearoff=0)
     menu_principal.add_cascade(label="Views", menu=menu_views)
     menu_views.add_command(label="Animais Vacinados", command=janela_vacinados)
@@ -194,6 +193,17 @@ def query_database(tabela):
                 my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][1], dados[num][2], dados[num][3], dados[num][4], dados[num][5]), tags=('oddrow', ))
             num += 1
     
+    elif tabela == "vacinados":   
+        cursor.execute("SELECT * FROM vacinados")
+        dados = cursor.fetchall()
+        #print(dados)
+        num = 0
+        for itens in dados:
+            if num % 2 == 0:
+                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][2], dados[num][3]), tags=('evenrow', ))
+            else:
+                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][2], dados[num][3]), tags=('oddrow', ))
+            num += 1
 
     #dando commit
     conexao.commit()
@@ -234,8 +244,6 @@ def atualizar_dados(tabela):
             mae_tag = mae_tag_entry.get()
             pai_tag = pai_tag_entry.get()
 
-
-            
             dados = (tag, tipo, data_nascimento, peso, sexo, mae_tag, pai_tag, tag)
             print(dados)
             try:
@@ -257,7 +265,6 @@ def atualizar_dados(tabela):
         aviso = messagebox.showinfo(title="Update", message="Nada foi alterado")
     
 
-
 #-----------------------------------------------------------------------------------------
 
 #deletando item do banco
@@ -277,7 +284,6 @@ def remover(tabela, pk, pk_entry):
         
         cursor = conexao.cursor()
         
-        
         sql = "DELETE FROM %s WHERE %s=%s"
         dados = (str(tabela), str(pk), str(pk_entry))
         print(dados)
@@ -286,8 +292,6 @@ def remover(tabela, pk, pk_entry):
             #cursor.execute("DELETE FROM animais WHERE tag=3")
         except Error as a:
             aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel remover o item \nErro: " + str(a))
-        
-        
         
         #dando commit
         conexao.commit
@@ -423,7 +427,6 @@ def janela_simplex():
     cria_menu()
     root.geometry("500x300")
 
-
     #função simplex
     def simplex():
         #indices da função de MINIMIZAR
@@ -552,13 +555,9 @@ def janela_funcionarios():
     my_tree.heading("Carteira Trab", text="Carteira Trab", anchor=CENTER)
     my_tree.heading("Cargo", text="Cargo", anchor=CENTER)
 
-
-
     #alternando as cores das linhas
     my_tree.tag_configure('oddrow', background="white")
     my_tree.tag_configure('evenrow', background="lightblue")
-
-
 
     #adicionando as caixas de entrada
     data_frame = LabelFrame(root, text="Funcionários")
@@ -695,13 +694,9 @@ def janela_animais():
     my_tree.heading("Mãe", text="Mãe", anchor=CENTER)
     my_tree.heading("Pai", text="Pai", anchor=CENTER)
 
-
-
     #alternando as cores das linhas
     my_tree.tag_configure('oddrow', background="white")
     my_tree.tag_configure('evenrow', background="lightblue")
-
-
 
     #adicionando as caixas de entrada
     data_frame = LabelFrame(root, text="Animais")
@@ -757,7 +752,6 @@ def janela_animais():
     remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("animais","tag", tag_entry.get()))
     remove_all_button.grid(row=0 , column=2 , padx=10, pady=10)
 
-
     clear_box_button = Button(button_frame, text="Limpar")
     clear_box_button.grid(row=0 , column=7 , padx=10, pady=10)
 
@@ -786,7 +780,6 @@ def janela_vacinas():
         nome_entry.insert(0, valor[1])
         reforco_entry.insert(0, valor[2])
         
-
     root.geometry("910x470")
     
     #adicionando estilo
@@ -819,21 +812,15 @@ def janela_vacinas():
     my_tree.column("Nome", width=150, anchor=W)
     my_tree.column("Reforço", width=600, anchor=CENTER)
     
-
     #criando as headings
     my_tree.heading("#0", text="", anchor=W)
     my_tree.heading("ID", text="ID", anchor=W)
     my_tree.heading("Nome", text="Nome", anchor=W)
     my_tree.heading("Reforço", text="Reforço", anchor=CENTER)
     
-
-
-
     #alternando as cores das linhas
     my_tree.tag_configure('oddrow', background="white")
     my_tree.tag_configure('evenrow', background="lightblue")
-
-
 
     #adicionando as caixas de entrada
     data_frame = LabelFrame(root, text="Vacinas")
@@ -854,7 +841,6 @@ def janela_vacinas():
     reforco_entry = Entry(data_frame, width=60)
     reforco_entry.grid(row=0, column=5, padx=10, pady=10, columnspan=8)
     
-    
     query_database("vacinas")
 
     #adicionando botões
@@ -869,7 +855,6 @@ def janela_vacinas():
 
     remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("vacinas","id", id_vacina_entry.get()))
     remove_all_button.grid(row=0 , column=2 , padx=10, pady=10)
-
 
     clear_box_button = Button(button_frame, text="Limpar")
     clear_box_button.grid(row=0 , column=7 , padx=10, pady=10)
@@ -900,7 +885,6 @@ def janela_vacinacao():
         animaisfk_tag_entry.insert(0, valor[2])
         data_vacinacao_entry.insert(0, valor[3])
         
-
     root.geometry("1000x500")
     
     #adicionando estilo
@@ -934,22 +918,16 @@ def janela_vacinacao():
     my_tree.column("Animal", width=140, anchor=CENTER)
     my_tree.column("Data", width=140, anchor=CENTER)
     
-
     #criando as headings
     my_tree.heading("#0", text="", anchor=W)
     my_tree.heading("ID", text="ID", anchor=W)
     my_tree.heading("Vacina", text="Vacina", anchor=W)
     my_tree.heading("Animal", text="Animal", anchor=CENTER)
-    my_tree.heading("Data", text="Data", anchor=CENTER)
-    
-
-
+    my_tree.heading("Data", text="Data", anchor=CENTER)   
 
     #alternando as cores das linhas
     my_tree.tag_configure('oddrow', background="white")
     my_tree.tag_configure('evenrow', background="lightblue")
-
-
 
     #adicionando as caixas de entrada
     data_frame = LabelFrame(root, text="Vacinação")
@@ -975,7 +953,6 @@ def janela_vacinacao():
     data_vacinacao_entry = Entry(data_frame)
     data_vacinacao_entry.grid(row=0, column=7, padx=10, pady=10)
     
-    
     query_database("vacinacao")
 
     #adicionando botões
@@ -990,7 +967,6 @@ def janela_vacinacao():
 
     remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("vacinacao","id", id_vacinacao_entry.get()))
     remove_all_button.grid(row=0 , column=2 , padx=10, pady=10)
-
 
     clear_box_button = Button(button_frame, text="Limpar")
     clear_box_button.grid(row=0 , column=7 , padx=10, pady=10)
@@ -1019,7 +995,6 @@ def janela_estoque():
         item_entry.insert(0, valor[1])
         quantidade_entry.insert(0, valor[2])
         
-
     root.geometry("900x500")
     
     #adicionando estilo
@@ -1052,20 +1027,15 @@ def janela_estoque():
     my_tree.column("Item", width=300, anchor=W)
     my_tree.column("Quantidade", width=100, anchor=CENTER)
     
-
     #criando as headings
     my_tree.heading("#0", text="", anchor=W)
     my_tree.heading("ID", text="ID", anchor=W)
     my_tree.heading("Item", text="Item", anchor=W)
     my_tree.heading("Quantidade", text="Quantidade", anchor=CENTER)
     
-
-
     #alternando as cores das linhas
     my_tree.tag_configure('oddrow', background="white")
     my_tree.tag_configure('evenrow', background="lightblue")
-
-
 
     #adicionando as caixas de entrada
     data_frame = LabelFrame(root, text="Estoque")
@@ -1085,7 +1055,6 @@ def janela_estoque():
     quantidade_label.grid(row=0, column=6, padx=10, pady=10)
     quantidade_entry = Entry(data_frame)
     quantidade_entry.grid(row=0, column=7, padx=10, pady=10)
-    
     
     query_database("estoque")
 
@@ -1130,7 +1099,6 @@ def janela_problemas_gestacao():
         nome_prob_gest_entry.insert(0, valor[1])
         descricao_prob_gest_entry.insert(0, valor[2])
         
-
     root.geometry("1030x500")
     
     #adicionando estilo
@@ -1163,19 +1131,15 @@ def janela_problemas_gestacao():
     my_tree.column("Problema", width=300, anchor=W)
     my_tree.column("Descrição", width=600, anchor=CENTER)
     
-
     #criando as headings
     my_tree.heading("#0", text="", anchor=W)
     my_tree.heading("ID", text="ID", anchor=W)
     my_tree.heading("Problema", text="Problema", anchor=W)
     my_tree.heading("Descrição", text="Descrição", anchor=CENTER)
     
-
     #alternando as cores das linhas
     my_tree.tag_configure('oddrow', background="white")
     my_tree.tag_configure('evenrow', background="lightblue")
-
-
 
     #adicionando as caixas de entrada
     data_frame = LabelFrame(root, text="Problemas de Gestação")
@@ -1219,7 +1183,6 @@ def janela_problemas_gestacao():
     #bind th treeview
     my_tree.bind("<ButtonRelease-1>", selecionar_dados_arvore)
 
-
 #-----------------------------------------------------------------------------------------
 
 #criando a janela para tabela gestação
@@ -1243,8 +1206,7 @@ def janela_gestacao():
         gestacao_tag_entry.insert(0, valor[1])
         pgid_gestacao_entry.insert(0, valor[2])
         descricao_gestacao_entry.insert(0, valor[3])
-        data_gestacao_entry.insert(0, valor[4])
-        
+        data_gestacao_entry.insert(0, valor[4])   
 
     root.geometry("1030x500")
     
@@ -1280,7 +1242,6 @@ def janela_gestacao():
     my_tree.column("Descrição", width=300, anchor=CENTER)
     my_tree.column("Data", width=140, anchor=CENTER)
     
-
     #criando as headings
     my_tree.heading("#0", text="", anchor=W)
     my_tree.heading("ID", text="ID", anchor=W)
@@ -1289,12 +1250,9 @@ def janela_gestacao():
     my_tree.heading("Descrição", text="Descrição", anchor=CENTER)
     my_tree.heading("Data", text="Data", anchor=CENTER)
     
-
     #alternando as cores das linhas
     my_tree.tag_configure('oddrow', background="white")
     my_tree.tag_configure('evenrow', background="lightblue")
-
-
 
     #adicionando as caixas de entrada
     data_frame = LabelFrame(root, text="Gestação")
@@ -1325,7 +1283,6 @@ def janela_gestacao():
     data_gestacao_entry = Entry(data_frame)
     data_gestacao_entry.grid(row=1, column=3, padx=10, pady=10)
     
-    
     query_database("gestacao")
 
     #adicionando botões
@@ -1340,7 +1297,6 @@ def janela_gestacao():
 
     remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("gestacao","id", id_gestacao_entry.get()))
     remove_all_button.grid(row=0 , column=2 , padx=10, pady=10)
-
 
     clear_box_button = Button(button_frame, text="Limpar")
     clear_box_button.grid(row=0 , column=7 , padx=10, pady=10)
@@ -1363,7 +1319,6 @@ def janela_fornecedores():
         endereco_fornecedor_entry.delete(0, END)
         telefone_fornecedor_entry.delete(0, END)
         
-
         selecionado = my_tree.focus()
 
         valor = my_tree.item(selecionado, 'values')
@@ -1497,7 +1452,6 @@ def janela_transacao():
         quantidade_transacao_entry.insert(0, valor[4])
         valor_unitario_transacao_entry.insert(0, valor[5])
         
-
     root.geometry("1030x500")
     
     #adicionando estilo
@@ -1533,7 +1487,6 @@ def janela_transacao():
     my_tree.column("Quantidade", width=140, anchor=CENTER)
     my_tree.column("Valor Unitário", width=140, anchor=CENTER)
     
-
     #criando as headings
     my_tree.heading("#0", text="", anchor=W)
     my_tree.heading("ID", text="ID", anchor=W)
@@ -1543,11 +1496,9 @@ def janela_transacao():
     my_tree.heading("Quantidade", text="Quantidade", anchor=CENTER)
     my_tree.heading("Valor Unitário", text="Valor Unitário", anchor=CENTER)
 
-
     #alternando as cores das linhas
     my_tree.tag_configure('oddrow', background="white")
     my_tree.tag_configure('evenrow', background="lightblue")
-
 
     #adicionando as caixas de entrada
     data_frame = LabelFrame(root, text="Animais")
@@ -1583,7 +1534,6 @@ def janela_transacao():
     valor_unitario_transacao_entry = Entry(data_frame)
     valor_unitario_transacao_entry.grid(row=1, column=5, padx=10, pady=10)
     
-    
     query_database("transacao")
 
     #adicionando botões
@@ -1598,7 +1548,6 @@ def janela_transacao():
 
     remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("transacao","id", id_transacao_entry.get()))
     remove_all_button.grid(row=0 , column=2 , padx=10, pady=10)
-
 
     clear_box_button = Button(button_frame, text="Limpar")
     clear_box_button.grid(row=0 , column=7 , padx=10, pady=10)
@@ -1618,31 +1567,60 @@ def janela_vacinados():
     vacinados_frame = Frame(root)
     vacinados_frame.pack(padx=10, pady=10)
 
-    try:
-        conexao = mysql.connector.connect(
-            host = "localhost",
-            user = "root",
-            passwd = "aneis1961",
-            database = "casima"
-        )
-        #criando o cursor
-        cursor = conexao.cursor()
-    except Error as e:
-        aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel se conectar ao banco de dados \nErro: " + str(e))
+    root.geometry("1030x500")
     
-    cursor.execute("SELECT * FROM vacinados")
-    resultado = cursor.fetchall()
+    #adicionando estilo
+    style = ttk.Style()
+    style.theme_use('default')
+    style.configure("Treeview", background="#D3D3D3", foreground="black", rowheight=25, fieldbackground="#D3D3D3")
+    style.map('Treeview', background=[('selected', "#347083")])
 
-    for item in resultado:
-        print(item)
+    global my_tree
+
+    #criando frame da treeview
+    vacinados_frame = Frame(root)
+    vacinados_frame.pack(pady=10)
+
+    #criando o scroll da treeview
+    tree_scroll = Scrollbar(vacinados_frame)
+    tree_scroll.pack(side=RIGHT, fill=Y)
+
+    #criando a treeview
+    my_tree = ttk.Treeview(vacinados_frame, yscrollcommand=tree_scroll.set, selectmode="extended")
+    my_tree.pack()
+
+    #configurando o scroll
+    tree_scroll.config(command=my_tree.yview)
+
+    #difinindo as colunas
+    my_tree['columns'] = ("Animal", "Vacina", "Data")
+    my_tree.column("#0", width=0, stretch=NO)
+    my_tree.column("Animal", width=140, anchor=CENTER)
+    my_tree.column("Vacina", width=140, anchor=CENTER)
+    my_tree.column("Data", width=140, anchor=CENTER)
+    
+    
+    #criando as headings
+    my_tree.heading("#0", text="", anchor=W)
+    my_tree.heading("Animal", text="Animal", anchor=CENTER)
+    my_tree.heading("Vacina", text="Vacina", anchor=CENTER)
+    my_tree.heading("Data", text="Data", anchor=CENTER)
+    
+
+    #alternando as cores das linhas
+    my_tree.tag_configure('oddrow', background="white")
+    my_tree.tag_configure('evenrow', background="lightblue")
+
+    query_database("vacinados")
 
     conexao.commit()
     conexao.close()
 
-    
 #-----------------------------------------------------------------------------------------
 
-
 cria_menu()
+frame_incial = Frame(root)
+frame_incial.pack(fill="x", expand="yes", padx=20)
+titulo = Label(frame_incial, text="Casima Agrícola", font=("Helvetica", 40)).pack(padx=30, pady=30)
 
 root.mainloop()
