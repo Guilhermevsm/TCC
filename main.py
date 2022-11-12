@@ -58,6 +58,7 @@ def cria_menu():
     menu_views = Menu(menu_principal, tearoff=0)
     menu_principal.add_cascade(label="Views", menu=menu_views)
     menu_views.add_command(label="Animais Vacinados", command=janela_vacinados)
+    menu_views.add_command(label="Decendentes", command=janela_filhos)
 
     menu_racao = Menu(menu_principal, tearoff=0)
     menu_principal.add_cascade(label="Ração", menu=menu_racao)
@@ -65,12 +66,18 @@ def cria_menu():
     menu_racao.add_separator()
     menu_racao.add_command(label="Sair", command=root.quit)
 
+    menu_backup = Menu(menu_principal, tearoff=0)
+    menu_principal.add_cascade(label="Backup", menu=menu_backup)
+    menu_backup.add_command(label="Fazer Backup")
+
 
 #-----------------------------------------------------------------------------------------
 
 #pegando os itens do banco de dados e colocando na arvore
 def query_database(tabela):
     #print(tabela)
+    for item in my_tree.get_children():
+        my_tree.delete(item)
     try:
         conexao = mysql.connector.connect(
             host = "localhost",
@@ -215,9 +222,6 @@ def query_database(tabela):
             print("Conexão com o banco não foi sucedida!")
         dados = cursor.fetchall()
 
-
-        for item in my_tree.get_children():
-                my_tree.delete(item)
         num = 0
         for itens in dados:
             if num % 2 == 0:
@@ -306,12 +310,16 @@ def remover(tabela, pk, pk_entry):
         
         cursor = conexao.cursor()
         
-        sql = "DELETE FROM %s WHERE %s=%s"
-        dados = (str(tabela), str(pk), str(pk_entry))
+        sql = "DELETE FROM %s WHERE %s = %s"
+        tabela = str(tabela)
+        primary_key = str(pk)
+        primary_key_value = int(pk_entry)
+        dados = (tabela, primary_key, primary_key_value)
         print(dados)
         try:
-            cursor.execute(sql, dados)
-            #cursor.execute("DELETE FROM animais WHERE tag=3")
+            #cursor.execute(sql, dados)
+            cursor.execute()
+            #cursor.execute("DELETE FROM animais WHERE tag=11")
         except Error as a:
             aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel remover o item \nErro: " + str(a))
         
@@ -346,8 +354,6 @@ def adicionar_ao_banco(tabela):
 
         cursor.execute(sql, valores)
 
-        conexao.commit()
-        conexao.close()
         my_tree.delete(*my_tree.get_children())
         query_database("funcionarios")
 
@@ -357,8 +363,6 @@ def adicionar_ao_banco(tabela):
 
         cursor.execute(sql, valores)
 
-        conexao.commit()
-        conexao.close()
         my_tree.delete(*my_tree.get_children())
         query_database("animais")
 
@@ -368,8 +372,6 @@ def adicionar_ao_banco(tabela):
 
         cursor.execute(sql, valores)
 
-        conexao.commit()
-        conexao.close()
         my_tree.delete(*my_tree.get_children())
         query_database("vacinas")
 
@@ -379,8 +381,6 @@ def adicionar_ao_banco(tabela):
 
         cursor.execute(sql, valores)
 
-        conexao.commit()
-        conexao.close()
         my_tree.delete(*my_tree.get_children())
         query_database("vacinacao")
 
@@ -390,8 +390,6 @@ def adicionar_ao_banco(tabela):
 
         cursor.execute(sql, valores)
 
-        conexao.commit()
-        conexao.close()
         my_tree.delete(*my_tree.get_children())
         query_database("estoque")
 
@@ -401,8 +399,6 @@ def adicionar_ao_banco(tabela):
 
         cursor.execute(sql, valores)
 
-        conexao.commit()
-        conexao.close()
         my_tree.delete(*my_tree.get_children())
         query_database("problemas_gestacao")
 
@@ -412,8 +408,6 @@ def adicionar_ao_banco(tabela):
 
         cursor.execute(sql, valores)
 
-        conexao.commit()
-        conexao.close()
         my_tree.delete(*my_tree.get_children())
         query_database("gestacao")
 
@@ -423,8 +417,6 @@ def adicionar_ao_banco(tabela):
 
         cursor.execute(sql, valores)
 
-        conexao.commit()
-        conexao.close()
         my_tree.delete(*my_tree.get_children())
         query_database("fornecedores")
 
@@ -434,10 +426,11 @@ def adicionar_ao_banco(tabela):
 
         cursor.execute(sql, valores)
 
-        conexao.commit()
-        conexao.close()
         my_tree.delete(*my_tree.get_children())
         query_database("transacao")
+
+    conexao.commit()
+    conexao.close()
 
 
 #-----------------------------------------------------------------------------------------
@@ -1654,6 +1647,65 @@ def janela_vacinados():
     limpar_button = Button(button_frame, text="Restaurar Tabela", command=lambda:query_database("vacinados"))
     limpar_button.grid(row=0 , column=1 , padx=10, pady=10)
     
+
+#-----------------------------------------------------------------------------------------
+
+#criar janela para vizualizar os filhos de um animal
+def janela_filhos():
+    for widgets in root.winfo_children():
+        widgets.destroy()
+    cria_menu()
+    def escolher_animal_mae(tipo, escolhido):
+        conexao = mysql.connector.connect(
+            host = "localhost",
+            user = "root",
+            passwd = "aneis1961",
+            database = "casima"
+        )
+        #criando o cursor
+        cursor = conexao.cursor()
+        if tipo == "mae_tag":
+            sql = "SELECT * FROM animais WHERE mae_tag = %s"
+        elif tipo == "pai_tag":
+            sql = "SELECT * FROM animais WHERE pai_tag = %s"
+        else:
+            sql = "SELECT * FROM animais WHERE tag = %s"
+        
+        animal = (str(escolhido), )
+        print(animal)
+        
+        try:
+            cursor.execute(sql, animal)
+            print("sim")
+        except Error as e:
+            print(e)
+        
+        resultado = cursor.fetchall()
+        resultado_label = Label(frame_parentes, text=str(resultado))
+        resultado_label.grid(row=5, column=0, columnspan=2, pady=10)
+        conexao.commit()
+        conexao.close()
+
+    frame_parentes = Frame(root)
+    frame_parentes.pack(pady=10, padx=10, fill="x", expand="yes")
+
+    animal_parente_label = Label(frame_parentes, text="Animal ")
+    animal_parente_label.grid(row=0, column=0, pady=10)
+
+    animal_parente_entry = Entry(frame_parentes)
+    animal_parente_entry.grid(row=0, column=1, pady=10)
+    escolha_radio = StringVar()
+    escolha_radio.set("mae_tag")
+    Radiobutton(frame_parentes, text="Mãe", variable=escolha_radio, value="mae_tag").grid(row=1,column=0)
+    
+    Radiobutton(frame_parentes, text="Pai", variable=escolha_radio, value="pai_tag").grid(row=2,column=0)
+    
+    Radiobutton(frame_parentes, text="Filho", variable=escolha_radio, value="tag").grid(row=3,column=0)
+    
+
+    botao_escolher = Button(frame_parentes, text="Mostrar", command=lambda:escolher_animal_mae(escolha_radio.get(), animal_parente_entry.get()))
+    botao_escolher.grid(row=4, column=0)
+
 
 #-----------------------------------------------------------------------------------------
 
