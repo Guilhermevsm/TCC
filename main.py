@@ -258,13 +258,13 @@ def atualizar_dados(tabela):
             #atualizando o banco
             sql = "UPDATE animais SET tag = %s, tipo = %s, data_nascimento = %s, peso = %s, sexo = %s, mae_tag = %s, pai_tag = %s WHERE tag = %s "
 
-            tag = tag_entry.get()
-            tipo = tipo_entry.get()
-            data_nascimento = data_nascimento_entry.get()
-            peso = peso_entry.get()
-            sexo = sexo_entry.get()
-            mae_tag = mae_tag_entry.get()
-            pai_tag = pai_tag_entry.get()
+            tag = str(tag_entry.get())
+            tipo = str(tipo_entry.get())
+            data_nascimento = str(data_nascimento_entry.get())
+            peso = str(peso_entry.get())
+            sexo = str(sexo_entry.get())
+            mae_tag = str(mae_tag_entry.get())
+            pai_tag = str(pai_tag_entry.get())
 
             dados = (tag, tipo, data_nascimento, peso, sexo, mae_tag, pai_tag, tag)
             print(dados)
@@ -276,7 +276,7 @@ def atualizar_dados(tabela):
                 aviso = messagebox.showerror(title="ERRO", message="Não foi possível salvar as alterações \nErro: " + str(e))
 
             #dando commit
-            conexao.commit
+            conexao.commit()
 
             #fechando a conexao
             conexao.close()
@@ -316,7 +316,7 @@ def remover(tabela, pk, pk_entry):
             aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel remover o item \nErro: " + str(a))
         
         #dando commit
-        conexao.commit
+        conexao.commit()
 
         #fechando a conexao
         conexao.close()
