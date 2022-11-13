@@ -274,11 +274,8 @@ def atualizar_dados(tabela):
             print(dados)
             try:
                 cursor.execute(sql, dados)
-                #cursor.execute("UPDATE animais SET tag=%s, tipo=%s, data_nascimento=%s, peso=%s, sexo=%s, mae_tag=%s, pai_tag=%s WHERE tag=%s", (tag_entry.get(), tipo_entry.get(), data_nascimento_entry.get(), peso_entry.get(), sexo_entry.get(), mae_tag_entry.get(), pai_tag_entry.get(), tag_entry.get()))
-                print("sim3")
             except Error as e:
                 aviso = messagebox.showerror(title="ERRO", message="Não foi possível salvar as alterações \nErro: " + str(e))
-
             #dando commit
             conexao.commit()
 
@@ -286,6 +283,38 @@ def atualizar_dados(tabela):
             conexao.close()
             my_tree.delete(*my_tree.get_children())
             query_database("animais")
+        
+        if tabela == "funcionarios":
+            print("sim")
+            #criando o cursor
+            
+            #atualizando o banco
+            sql = "UPDATE funcionarios SET nome = %s, telefone = %s, endereco = %s, salario = %s, carteira_trabalho = %s, cargo = %s WHERE cpf = %s "
+
+            cpf = str(cpf_entry.get())
+            nome = str(nome_entry.get())
+            telefone = str(telefone_entry.get())
+            endereco = str(endereco_entry.get())
+            salario = str(salario_entry.get())
+            carteira_trabalho = str(carteira_trabalho_entry.get())
+            cargo = str(cargo_entry.get())
+
+            dados = (nome, telefone, endereco, salario, carteira_trabalho, cargo, cpf)
+            print(dados)
+            try:
+                cursor.execute(sql, dados)
+            except Error as e:
+                aviso = messagebox.showerror(title="ERRO", message="Não foi possível salvar as alterações \nErro: " + str(e))
+            #dando commit
+            conexao.commit()
+
+            #fechando a conexao
+            conexao.close()
+            my_tree.delete(*my_tree.get_children())
+            query_database("funcionarios")
+        
+        
+        
            
     else:
         aviso = messagebox.showinfo(title="Update", message="Nada foi alterado")
@@ -619,7 +648,7 @@ def janela_funcionarios():
     button_frame = LabelFrame(root, text="Ações")
     button_frame.pack(fill="x", expand="yes", padx=20)
 
-    update_button = Button(button_frame, text="Atualizar")
+    update_button = Button(button_frame, text="Atualizar", command=lambda:adicionar_ao_banco("funcionarios"))
     update_button.grid(row=0 , column=0 , padx=10, pady=10)
 
     add_button = Button(button_frame, text="Adicionar", command=lambda:adicionar_ao_banco("funcionarios"))
@@ -1664,27 +1693,71 @@ def janela_filhos():
         )
         #criando o cursor
         cursor = conexao.cursor()
+        
+
         if tipo == "mae_tag":
             sql = "SELECT * FROM animais WHERE mae_tag = %s"
+            animal = (str(escolhido), )
+            print(animal)
+            
+            try:
+                cursor.execute(sql, animal)
+                print("sim")
+            except Error as e:
+                print(e)
+            resultado = cursor.fetchall()
+            resultado_label = Label(frame_parentes, text=str(resultado))
+            resultado_label.grid(row=6, column=0, columnspan=20, pady=10)
+        
         elif tipo == "pai_tag":
             sql = "SELECT * FROM animais WHERE pai_tag = %s"
-        else:
-            sql = "SELECT * FROM animais WHERE tag = %s"
+            animal = (str(escolhido), )
+            print(animal)
+            
+            try:
+                cursor.execute(sql, animal)
+                print("sim")
+            except Error as e:
+                print(e)
+            resultado = cursor.fetchall()
+            resultado_label = Label(frame_parentes, text=str(resultado))
+            resultado_label.grid(row=6, column=0, columnspan=20, pady=10)
         
-        animal = (str(escolhido), )
-        print(animal)
+        elif tipo  == "tag":
+            sql = "SELECT mae_tag, pai_tag FROM animais WHERE tag = %s"
+            animal = (str(escolhido), )
+            print(animal)
+            
+            try:
+                cursor.execute(sql, animal)
+                print("sim")
+            except Error as e:
+                print(e)
+            resultado = cursor.fetchall()
+            resultado_label = Label(frame_parentes, text=str(resultado))
+            resultado_label.grid(row=6, column=0, columnspan=20, pady=10)
         
-        try:
-            cursor.execute(sql, animal)
-            print("sim")
-        except Error as e:
-            print(e)
+        elif tipo == "materno":
+            condicao = (str(escolhido))
+            num = 0
+            while condicao != 0:
+                sql = "SELECT mae_tag FROM animais WHERE tag = %s"
+                animal = (condicao, )
+                try:
+                    cursor.execute(sql, animal)
+                except Error as e:
+                    print(e)
+                resultado = cursor.fetchall()
+                condicao = resultado[0][0]
+                print(condicao)
+                resultado_label = Label(frame_parentes, text=str(condicao))
+                resultado_label.grid(row=num+6, column=1, columnspan=20, pady=10)
+                num +=1
         
-        resultado = cursor.fetchall()
-        resultado_label = Label(frame_parentes, text=str(resultado))
-        resultado_label.grid(row=5, column=0, columnspan=2, pady=10)
+        
         conexao.commit()
         conexao.close()
+        print(resultado[0][0])
 
     frame_parentes = Frame(root)
     frame_parentes.pack(pady=10, padx=10, fill="x", expand="yes")
@@ -1696,15 +1769,16 @@ def janela_filhos():
     animal_parente_entry.grid(row=0, column=1, pady=10)
     escolha_radio = StringVar()
     escolha_radio.set("mae_tag")
-    Radiobutton(frame_parentes, text="Mãe", variable=escolha_radio, value="mae_tag").grid(row=1,column=0)
+    Radiobutton(frame_parentes, text="Filhos Vaca", variable=escolha_radio, value="mae_tag").grid(row=1,column=0)
     
-    Radiobutton(frame_parentes, text="Pai", variable=escolha_radio, value="pai_tag").grid(row=2,column=0)
+    Radiobutton(frame_parentes, text="Filhos Boi", variable=escolha_radio, value="pai_tag").grid(row=2,column=0)
     
-    Radiobutton(frame_parentes, text="Filho", variable=escolha_radio, value="tag").grid(row=3,column=0)
+    Radiobutton(frame_parentes, text="Parentes", variable=escolha_radio, value="tag").grid(row=3,column=0)
     
+    Radiobutton(frame_parentes, text="Parentesco Materno", variable=escolha_radio, value="materno").grid(row=4,column=0)
 
     botao_escolher = Button(frame_parentes, text="Mostrar", command=lambda:escolher_animal_mae(escolha_radio.get(), animal_parente_entry.get()))
-    botao_escolher.grid(row=4, column=0)
+    botao_escolher.grid(row=5, column=0)
 
 
 #-----------------------------------------------------------------------------------------
