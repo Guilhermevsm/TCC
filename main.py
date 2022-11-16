@@ -4,6 +4,7 @@ import mysql.connector
 from mysql.connector import Error
 from tkinter import messagebox
 from scipy.optimize import linprog
+import csv
 
 root = Tk()
 root.title('Casima Agrícola')
@@ -27,10 +28,10 @@ try:
     #fechando a conexa
     conexao.close()
 
-    print("Conexão com o banco feita com sucesso!")
+    #print("Conexão com o banco feita com sucesso!")
 except Error as e:
     aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel se conectar ao banco de dados \nErro: " + str(e))
-    print("Conexão com o banco não foi sucedida!")
+    #print("Conexão com o banco não foi sucedida!")
 
 #-----------------------------------------------------------------------------------------
 
@@ -63,12 +64,13 @@ def cria_menu():
     menu_racao = Menu(menu_principal, tearoff=0)
     menu_principal.add_cascade(label="Ração", menu=menu_racao)
     menu_racao.add_command(label="Mistura Ração", command=janela_simplex)
-    menu_racao.add_separator()
-    menu_racao.add_command(label="Sair", command=root.quit)
 
     menu_backup = Menu(menu_principal, tearoff=0)
     menu_principal.add_cascade(label="Backup", menu=menu_backup)
-    menu_backup.add_command(label="Fazer Backup")
+    menu_backup.add_command(label="Fazer Backup", command=fazer_backup)
+    menu_backup.add_command(label="Restaurar Backup")
+    menu_backup.add_separator()
+    menu_backup.add_command(label="Sair", command=root.quit)
 
 
 #-----------------------------------------------------------------------------------------
@@ -242,7 +244,7 @@ def query_database(tabela):
 
 #atualizar dados existentes
 def atualizar_dados(tabela):
-    response = messagebox.askyesno(title="Update",  message="Confirmar Alterações?")
+    response = messagebox.askyesno(title="Atualizar",  message="Confirmar Alterações?")
     if response == 1:
         
         try:
@@ -469,7 +471,7 @@ def atualizar_dados(tabela):
 
 #deletando item do banco
 def remover(tabela, pk, pk_entry):
-    response = messagebox.askyesno(title="Delete",  message="Confirmar Remoção?")
+    response = messagebox.askyesno(title="Deletar",  message="Confirmar Remoção?")
     if response == 1:
         
         try:
@@ -510,6 +512,153 @@ def remover(tabela, pk, pk_entry):
 
 #adicionar dados ao banco
 def adicionar_ao_banco(tabela):
+    response = messagebox.askyesno(title="Adicionar",  message="Confirmar Adição?")
+    if response == 1:
+        try:
+            conexao = mysql.connector.connect(
+                host = "localhost",
+                user = "root",
+                passwd = "aneis1961",
+                database = "casima"
+            )
+            #criando o cursor
+            cursor = conexao.cursor()
+        except Error as e:
+            aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel se conectar ao banco de dados \nErro: " + str(e))
+        
+        if tabela == "funcionarios":
+            sql = "INSERT INTO funcionarios (cpf, nome, telefone, endereco, salario, carteira_trabalho, cargo) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+            valores = (str(cpf_entry.get()), str(nome_entry.get()), str(telefone_entry.get()), str(endereco_entry.get()), str(salario_entry.get()), str(carteira_trabalho_entry.get()), str(cargo_entry.get()))
+
+            try:
+                cursor.execute(sql, valores)
+            except Error as e:
+                aviso = messagebox.showerror(title="ERRO", message="Não foi possível adicionar ao banco! \nErro: " + str(e))
+
+            conexao.commit()
+            conexao.close()
+            my_tree.delete(*my_tree.get_children())
+            query_database("funcionarios")
+
+        elif tabela == "animais":
+            sql = "INSERT INTO animais (tag, tipo, data_nascimento, peso, sexo, mae_tag, pai_tag) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+            valores = (str(tag_entry.get()), str(tipo_entry.get()), str(data_nascimento_entry.get()), str(peso_entry.get()), str(sexo_entry.get()), str(mae_tag_entry.get()), str(pai_tag_entry.get()))
+
+            try:
+                cursor.execute(sql, valores)
+            except Error as e:
+                aviso = messagebox.showerror(title="ERRO", message="Não foi possível adicionar ao banco! \nErro: " + str(e))
+
+            conexao.commit()
+            conexao.close()
+            my_tree.delete(*my_tree.get_children())
+            query_database("animais")
+
+        elif tabela == "vacinas":
+            sql = "INSERT INTO vacinas (id, nome, reforco) VALUES (%s, %s, %s)"
+            valores = (str(id_vacina_entry.get()), str(nome_vacina_entry.get()), str(reforco_entry.get()))
+
+            try:
+                cursor.execute(sql, valores)
+            except Error as e:
+                aviso = messagebox.showerror(title="ERRO", message="Não foi possível adicionar ao banco! \nErro: " + str(e))
+
+            conexao.commit()
+            conexao.close()
+            my_tree.delete(*my_tree.get_children())
+            query_database("vacinas")
+
+        elif tabela == "vacinacao":
+            sql = "INSERT INTO vacinacao (id, vacina_id, animais_tag, data) VALUES (%s, %s, %s, %s)"
+            valores = (str(id_vacinacao_entry.get()), str(vacinafk_id_entry.get()), str(animaisfk_tag_entry.get()), str(data_vacinacao_entry.get()))
+
+            try:
+                cursor.execute(sql, valores)
+            except Error as e:
+                aviso = messagebox.showerror(title="ERRO", message="Não foi possível adicionar ao banco! \nErro: " + str(e))
+
+            conexao.commit()
+            conexao.close()
+            my_tree.delete(*my_tree.get_children())
+            query_database("vacinacao")
+
+        elif tabela == "estoque":
+            sql = "INSERT INTO estoque (id, item, quantidade) VALUES (%s, %s, %s)"
+            valores = (str(id_estoque_entry.get()), str(item_entry.get()), str(quantidade_entry.get()))
+
+            try:
+                cursor.execute(sql, valores)
+            except Error as e:
+                aviso = messagebox.showerror(title="ERRO", message="Não foi possível adicionar ao banco! \nErro: " + str(e))
+
+            conexao.commit()
+            conexao.close()
+            my_tree.delete(*my_tree.get_children())
+            query_database("estoque")
+
+        elif tabela == "problemas_gestacao":
+            sql = "INSERT INTO problemas_gestacao (id, nome, descricao) VALUES (%s, %s, %s)"
+            valores = (str(id_prob_gest_entry.get()), str(nome_prob_gest_entry.get()), str(descricao_prob_gest_entry.get()))
+
+            try:
+                cursor.execute(sql, valores)
+            except Error as e:
+                aviso = messagebox.showerror(title="ERRO", message="Não foi possível adicionar ao banco! \nErro: " + str(e))
+
+            conexao.commit()
+            conexao.close()
+            my_tree.delete(*my_tree.get_children())
+            query_database("problemas_gestacao")
+
+        elif tabela == "gestacao":
+            sql = "INSERT INTO gestacao (id, a_tag, pg_id, descricao, data) VALUES (%s, %s, %s, %s, %s)"
+            valores = (str(id_gestacao_entry.get()), str(gestacao_tag_entry.get()), str(pgid_gestacao_entry.get()), str(descricao_gestacao_entry.get()), str(data_gestacao_entry.get()))
+
+            try:
+                cursor.execute(sql, valores)
+            except Error as e:
+                aviso = messagebox.showerror(title="ERRO", message="Não foi possível adicionar ao banco! \nErro: " + str(e))
+
+            conexao.commit()
+            conexao.close()
+            my_tree.delete(*my_tree.get_children())
+            query_database("gestacao")
+
+        elif tabela == "fornecedores":
+            sql = "INSERT INTO fornecedores (cnpj, nome, cidade, endereco, telefone) VALUES (%s, %s, %s, %s, %s)"
+            valores = (str(cnpj_fornecedor_entry.get()), str(nome_fornecedor_entry.get()), str(cidade_fornecedor_entry.get()), str(endereco_fornecedor_entry.get()), str(telefone_fornecedor_entry.get()))
+
+            try:
+                cursor.execute(sql, valores)
+            except Error as e:
+                aviso = messagebox.showerror(title="ERRO", message="Não foi possível adicionar ao banco! \nErro: " + str(e))
+
+            conexao.commit()
+            conexao.close()
+            my_tree.delete(*my_tree.get_children())
+            query_database("fornecedores")
+            
+
+        elif tabela == "transacao":
+            sql = "INSERT INTO transacao (id, f_id, e_id, data, quantidade, valor_unitario) VALUES (%s, %s, %s, %s, %s, %s)"
+            valores = (str(id_transacao_entry.get()), str(f_id_transacao_entry.get()), str(e_id_transacao_entry.get()), str(data_transacao_entry.get()), str(quantidade_transacao_entry.get()), str(valor_unitario_transacao_entry.get()))
+
+            try:
+                cursor.execute(sql, valores)
+            except Error as e:
+                aviso = messagebox.showerror(title="ERRO", message="Não foi possível adicionar ao banco! \nErro: " + str(e))
+
+            my_tree.delete(*my_tree.get_children())
+            conexao.commit()
+            conexao.close()
+            query_database("transacao")
+
+
+
+#-----------------------------------------------------------------------------------------
+
+#janela para fazer um backup do banco em um arquivo csv
+def fazer_backup():
     try:
         conexao = mysql.connector.connect(
             host = "localhost",
@@ -521,99 +670,121 @@ def adicionar_ao_banco(tabela):
         cursor = conexao.cursor()
     except Error as e:
         aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel se conectar ao banco de dados \nErro: " + str(e))
-      
-    if tabela == "funcionarios":
-        sql = "INSERT INTO funcionarios (cpf, nome, telefone, endereco, salario, carteira_trabalho, cargo) VALUES (%s, %s, %s, %s, %s, %s, %s)"
-        valores = (str(cpf_entry.get()), str(nome_entry.get()), str(telefone_entry.get()), str(endereco_entry.get()), str(salario_entry.get()), str(carteira_trabalho_entry.get()), str(cargo_entry.get()))
 
-        cursor.execute(sql, valores)
-        conexao.commit()
-        conexao.close()
-        my_tree.delete(*my_tree.get_children())
-        query_database("funcionarios")
+    tabelas = ["animais", "funcionarios", "vacinas", "vacinacao", "estoque", "problemas_gestacao", "gestacao", "fornecedores", "transacao"]
+    
+    for nome in tabelas:
+        if nome == "animais":
+            try:
+                cursor.execute("SELECT * FROM animais")
+            except Error as e:
+                aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
+            resultado = cursor.fetchall()
+            with open('backup.csv', 'a', newline='') as arquivo_backup:
+                arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
+                arquivo_backup.writerow(nome)
+                for item in resultado:
+                    arquivo_backup.writerow(item)
 
-    elif tabela == "animais":
-        sql = "INSERT INTO animais (tag, tipo, data_nascimento, peso, sexo, mae_tag, pai_tag) VALUES (%s, %s, %s, %s, %s, %s, %s)"
-        valores = (str(tag_entry.get()), str(tipo_entry.get()), str(data_nascimento_entry.get()), str(peso_entry.get()), str(sexo_entry.get()), str(mae_tag_entry.get()), str(pai_tag_entry.get()))
+        elif nome == "funcionarios":
+            try:
+                cursor.execute("SELECT * FROM funcionarios")
+            except Error as e:
+                aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
+            resultado = cursor.fetchall()
+            with open('backup.csv', 'a', newline='') as arquivo_backup:
+                arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
+                arquivo_backup.writerow(nome)
+                for item in resultado:
+                    arquivo_backup.writerow(item)
 
-        cursor.execute(sql, valores)
-        conexao.commit()
-        conexao.close()
-        my_tree.delete(*my_tree.get_children())
-        query_database("animais")
+        elif nome == "vacinas":
+            try:
+                cursor.execute("SELECT * FROM vacinas")
+            except Error as e:
+                aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
+            resultado = cursor.fetchall()
+            with open('backup.csv', 'a', newline='') as arquivo_backup:
+                arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
+                arquivo_backup.writerow(nome)
+                for item in resultado:
+                    arquivo_backup.writerow(item)
 
-    elif tabela == "vacinas":
-        sql = "INSERT INTO vacinas (id, nome, reforco) VALUES (%s, %s, %s)"
-        valores = (str(id_vacina_entry.get()), str(nome_vacina_entry.get()), str(reforco_entry.get()))
+        elif nome == "vacinacao":
+            try:
+                cursor.execute("SELECT * FROM vacinacao")
+            except Error as e:
+                aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
+            resultado = cursor.fetchall()
+            with open('backup.csv', 'a', newline='') as arquivo_backup:
+                arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
+                arquivo_backup.writerow(nome)
+                for item in resultado:
+                    arquivo_backup.writerow(item)
 
-        cursor.execute(sql, valores)
-        conexao.commit()
-        conexao.close()
-        my_tree.delete(*my_tree.get_children())
-        query_database("vacinas")
+        elif nome == "estoque":
+            try:
+                cursor.execute("SELECT * FROM estoque")
+            except Error as e:
+                aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
+            resultado = cursor.fetchall()
+            with open('backup.csv', 'a', newline='') as arquivo_backup:
+                arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
+                arquivo_backup.writerow(nome)
+                for item in resultado:
+                    arquivo_backup.writerow(item)
 
-    elif tabela == "vacinacao":
-        sql = "INSERT INTO vacinacao (id, vacina_id, animais_tag, data) VALUES (%s, %s, %s, %s)"
-        valores = (str(id_vacinacao_entry.get()), str(vacinafk_id_entry.get()), str(animaisfk_tag_entry.get()), str(data_vacinacao_entry.get()))
+        elif nome == "problemas_gestacao":
+            try:
+                cursor.execute("SELECT * FROM problemas_gestacao")
+            except Error as e:
+                aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
+            resultado = cursor.fetchall()
+            with open('backup.csv', 'a', newline='') as arquivo_backup:
+                arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
+                arquivo_backup.writerow(nome)
+                for item in resultado:
+                    arquivo_backup.writerow(item)
 
-        cursor.execute(sql, valores)
-        conexao.commit()
-        conexao.close()
-        my_tree.delete(*my_tree.get_children())
-        query_database("vacinacao")
+        elif nome == "gestacao":
+            try:
+                cursor.execute("SELECT * FROM gestacao")
+            except Error as e:
+                aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
+            resultado = cursor.fetchall()
+            with open('backup.csv', 'a', newline='') as arquivo_backup:
+                arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
+                arquivo_backup.writerow(nome)
+                for item in resultado:
+                    arquivo_backup.writerow(item)
 
-    elif tabela == "estoque":
-        sql = "INSERT INTO estoque (id, item, quantidade) VALUES (%s, %s, %s)"
-        valores = (str(id_estoque_entry.get()), str(item_entry.get()), str(quantidade_entry.get()))
+        elif nome == "fornecedores":
+            try:
+                cursor.execute("SELECT * FROM fornecedores")
+            except Error as e:
+                aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
+            resultado = cursor.fetchall()
+            with open('backup.csv', 'a', newline='') as arquivo_backup:
+                arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
+                arquivo_backup.writerow(nome)
+                for item in resultado:
+                    arquivo_backup.writerow(item)
 
-        cursor.execute(sql, valores)
-        conexao.commit()
-        conexao.close()
-        my_tree.delete(*my_tree.get_children())
-        query_database("estoque")
+        elif nome == "transacao":
+            try:
+                cursor.execute("SELECT * FROM transacao")
+            except Error as e:
+                aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
+            resultado = cursor.fetchall()
+            with open('backup.csv', 'a', newline='') as arquivo_backup:
+                arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
+                arquivo_backup.writerow(nome)
+                for item in resultado:
+                    arquivo_backup.writerow(item)
 
-    elif tabela == "problemas_gestacao":
-        sql = "INSERT INTO problemas_gestacao (id, nome, descricao) VALUES (%s, %s, %s)"
-        valores = (str(id_prob_gest_entry.get()), str(nome_prob_gest_entry.get()), str(descricao_prob_gest_entry.get()))
-
-        cursor.execute(sql, valores)
-        conexao.commit()
-        conexao.close()
-        my_tree.delete(*my_tree.get_children())
-        query_database("problemas_gestacao")
-
-    elif tabela == "gestacao":
-        sql = "INSERT INTO gestacao (id, a_tag, pg_id, descricao, data) VALUES (%s, %s, %s, %s, %s)"
-        valores = (str(id_gestacao_entry.get()), str(gestacao_tag_entry.get()), str(pgid_gestacao_entry.get()), str(descricao_gestacao_entry.get()), str(data_gestacao_entry.get()))
-
-        cursor.execute(sql, valores)
-        conexao.commit()
-        conexao.close()
-        my_tree.delete(*my_tree.get_children())
-        query_database("gestacao")
-
-    elif tabela == "fornecedores":
-        sql = "INSERT INTO fornecedores (cnpj, nome, cidade, endereco, telefone) VALUES (%s, %s, %s, %s, %s)"
-        valores = (str(cnpj_fornecedor_entry.get()), str(nome_fornecedor_entry.get()), str(cidade_fornecedor_entry.get()), str(endereco_fornecedor_entry.get()), str(telefone_fornecedor_entry.get()))
-
-        cursor.execute(sql, valores)
-        conexao.commit()
-        conexao.close()
-        my_tree.delete(*my_tree.get_children())
-        query_database("fornecedores")
-        
-
-    elif tabela == "transacao":
-        sql = "INSERT INTO transacao (id, f_id, e_id, data, quantidade, valor_unitario) VALUES (%s, %s, %s, %s, %s, %s)"
-        valores = (str(id_transacao_entry.get()), str(f_id_transacao_entry.get()), str(e_id_transacao_entry.get()), str(data_transacao_entry.get()), str(quantidade_transacao_entry.get()), str(valor_unitario_transacao_entry.get()))
-
-        cursor.execute(sql, valores)
-
-        my_tree.delete(*my_tree.get_children())
-        
-        conexao.commit()
-        conexao.close()
-        query_database("transacao")
+    conexao.commit()
+    conexao.close()
+    aviso = messagebox.showinfo(title="Backup", message="Backup feito com sucesso!")
 
 
 
@@ -1618,7 +1789,6 @@ def janela_fornecedores():
     remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("fornecedores","cnpj", cnpj_fornecedor_entry.get()))
     remove_all_button.grid(row=0 , column=2 , padx=10, pady=10)
 
-
     clear_box_button = Button(button_frame, text="Limpar")
     clear_box_button.grid(row=0 , column=7 , padx=10, pady=10)
 
@@ -1851,60 +2021,38 @@ def janela_filhos():
         )
         #criando o cursor
         cursor = conexao.cursor()
-        if tipo == "mae_tag":
-            sql = "SELECT * FROM animais WHERE mae_tag = %s"
-            animal = (str(escolhido), )
-            print(animal)
-            
-            try:
-                cursor.execute(sql, animal)
-                print("sim")
-            except Error as e:
-                print(e)
-            resultado = cursor.fetchall()
-            num = 0
-            for item in resultado:
-                resultado_filhos_label = Label(frame2_parentes, text=str(resultado[num][0]))
-                resultado_filhos_label.grid(row=num, column=0, columnspan=20, pady=10)
-                num += 1
         
-        elif tipo == "pai_tag":
-            sql = "SELECT * FROM animais WHERE pai_tag = %s"
-            animal = (str(escolhido), )
-            print(animal)
-            
+        if tipo == "filhos":
+            sql = "SELECT * FROM animais WHERE pai_tag = %s OR mae_tag = %s"
+            animal = (str(escolhido), str(escolhido))
+            aux = 0
             try:
                 cursor.execute(sql, animal)
-                print("sim")
             except Error as e:
                 print(e)
             resultado = cursor.fetchall()
-            num = 0
             for item in resultado:
-                resultado_filhos_label = Label(frame2_parentes, text=str(resultado[num][0]))
-                resultado_filhos_label.grid(row=num, column=0, columnspan=20, pady=10)
-                num += 1
+                resultado_filhos_label = Label(frame2_parentes, text=str(item[0]))
+                resultado_filhos_label.grid(row=aux, column=0, columnspan=20, pady=10)
+                aux += 1
         
         elif tipo  == "tag":
             sql = "SELECT mae_tag, pai_tag FROM animais WHERE tag = %s"
             animal = (str(escolhido), )
-            print(animal)
-            
+            aux = 0
             try:
                 cursor.execute(sql, animal)
-                print("sim")
             except Error as e:
                 print(e)
             resultado = cursor.fetchall()
-            num = 0
             for item in resultado:
-                resultado_filhos_label = Label(frame2_parentes, text="Mãe = " + str(resultado[num][0]) + "\nPai =  " + str(resultado[num][1]) )
-                resultado_filhos_label.grid(row=num, column=0, columnspan=20, pady=10)
-                num += 1
+                resultado_filhos_label = Label(frame2_parentes, text="Mãe = " + str(item[0]) + "\nPai =  " + str(item[1]) )
+                resultado_filhos_label.grid(row=aux, column=0, columnspan=20, pady=10)
+                aux += 1
         
         elif tipo == "materno":
             condicao = (str(escolhido))
-            num = 0
+            aux = 0
             while condicao != 0:
                 sql = "SELECT mae_tag FROM animais WHERE tag = %s"
                 animal = (condicao, )
@@ -1914,14 +2062,13 @@ def janela_filhos():
                     print(e)
                 resultado = cursor.fetchall()
                 condicao = resultado[0][0]
-                print(condicao)
                 resultado_filhos_label = Label(frame2_parentes, text=str(condicao))
-                resultado_filhos_label.grid(row=num, column=1, columnspan=20, pady=10)
-                num +=1
+                resultado_filhos_label.grid(row=aux, column=1, columnspan=20, pady=10)
+                aux += 1
 
         else:
             condicao = (str(escolhido))
-            num = 0
+            aux = 0
             while condicao != 0:
                 sql = "SELECT pai_tag FROM animais WHERE tag = %s"
                 animal = (condicao, )
@@ -1931,15 +2078,13 @@ def janela_filhos():
                     print(e)
                 resultado = cursor.fetchall()
                 condicao = resultado[0][0]
-                print(condicao)
                 resultado_filhos_label = Label(frame2_parentes, text=str(condicao))
-                resultado_filhos_label.grid(row=num, column=1, columnspan=20, pady=10)
-                num +=1
+                resultado_filhos_label.grid(row=aux, column=1, columnspan=20, pady=10)
+                aux += 1
         
         
         conexao.commit()
         conexao.close()
-        print(resultado[0][0])
     
     frame_parentes = LabelFrame(root, text="O que você quer saber?")
     frame_parentes.pack(pady=10, padx=10, fill="x", expand="yes", side="top")
@@ -1952,15 +2097,14 @@ def janela_filhos():
     
     escolha_radio = StringVar()
     escolha_radio.set("mae_tag")
-    Radiobutton(frame_parentes, text="Filhos Vaca", variable=escolha_radio, value="mae_tag").grid(row=0,column=0, sticky=W, padx=10)
-    
-    Radiobutton(frame_parentes, text="Filhos Boi", variable=escolha_radio, value="pai_tag").grid(row=1,column=0, sticky=W, padx=10)
-    
-    Radiobutton(frame_parentes, text="Parentes", variable=escolha_radio, value="tag").grid(row=2,column=0, sticky=W, padx=10)
-    
-    Radiobutton(frame_parentes, text="Parentesco Materno", variable=escolha_radio, value="materno").grid(row=3,column=0, sticky=W, padx=10)
 
-    Radiobutton(frame_parentes, text="Parentesco Paterno", variable=escolha_radio, value="paterno").grid(row=4,column=0, sticky=W, padx=10)
+    Radiobutton(frame_parentes, text="Filhos", variable=escolha_radio, value="filhos").grid(row=0,column=0, sticky=W, padx=10)
+    
+    Radiobutton(frame_parentes, text="Parentes", variable=escolha_radio, value="tag").grid(row=1,column=0, sticky=W, padx=10)
+    
+    Radiobutton(frame_parentes, text="Parentesco Materno", variable=escolha_radio, value="materno").grid(row=2,column=0, sticky=W, padx=10)
+
+    Radiobutton(frame_parentes, text="Parentesco Paterno", variable=escolha_radio, value="paterno").grid(row=3,column=0, sticky=W, padx=10)
 
     botao_escolher = Button(frame_parentes, text="Pesquisar", command=lambda:escolher_animal_mae(escolha_radio.get(), animal_parente_entry.get()), padx=10)
     botao_escolher.grid(row=2, column=1)
@@ -1968,11 +2112,10 @@ def janela_filhos():
     frame2_parentes = LabelFrame(root, text="Resultado")
     frame2_parentes.pack(pady=10, padx=10, fill="x", expand="yes")
 
-
 #-----------------------------------------------------------------------------------------
 
 cria_menu()
-frame_incial = Frame(root)
+frame_incial = LabelFrame(root, text="")
 frame_incial.pack(fill="x", expand="yes", padx=20)
 titulo = Label(frame_incial, text="Casima Agrícola", font=("Helvetica", 40)).pack(padx=30, pady=30)
 
