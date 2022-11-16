@@ -255,10 +255,8 @@ def atualizar_dados(tabela):
         except Error as e:
             aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel se conectar ao banco de dados \nErro: " + str(e))
         cursor = conexao.cursor()
+        
         if tabela == "animais":
-            print("sim")
-            #criando o cursor
-            
             #atualizando o banco
             sql = "UPDATE animais SET tag = %s, tipo = %s, data_nascimento = %s, peso = %s, sexo = %s, mae_tag = %s, pai_tag = %s WHERE tag = %s "
 
@@ -271,23 +269,18 @@ def atualizar_dados(tabela):
             pai_tag = str(pai_tag_entry.get())
 
             dados = (tag, tipo, data_nascimento, peso, sexo, mae_tag, pai_tag, tag)
-            print(dados)
             try:
                 cursor.execute(sql, dados)
             except Error as e:
                 aviso = messagebox.showerror(title="ERRO", message="Não foi possível salvar as alterações \nErro: " + str(e))
             #dando commit
             conexao.commit()
-
             #fechando a conexao
             conexao.close()
             my_tree.delete(*my_tree.get_children())
             query_database("animais")
         
-        if tabela == "funcionarios":
-            print("sim")
-            #criando o cursor
-            
+        elif tabela == "funcionarios":
             #atualizando o banco
             sql = "UPDATE funcionarios SET nome = %s, telefone = %s, endereco = %s, salario = %s, carteira_trabalho = %s, cargo = %s WHERE cpf = %s "
 
@@ -300,18 +293,170 @@ def atualizar_dados(tabela):
             cargo = str(cargo_entry.get())
 
             dados = (nome, telefone, endereco, salario, carteira_trabalho, cargo, cpf)
-            print(dados)
             try:
                 cursor.execute(sql, dados)
             except Error as e:
                 aviso = messagebox.showerror(title="ERRO", message="Não foi possível salvar as alterações \nErro: " + str(e))
             #dando commit
             conexao.commit()
-
             #fechando a conexao
             conexao.close()
             my_tree.delete(*my_tree.get_children())
             query_database("funcionarios")
+
+        elif tabela == "vacinas":
+            #atualizando o banco
+            sql = "UPDATE vacinas SET nome = %s, reforco = %s WHERE id = %s "
+
+            id_vacina = str(id_vacina_entry.get())
+            nome_vacina = str(nome_vacina_entry.get())
+            reforco = str(reforco_entry.get())
+
+            dados = (nome_vacina, reforco, id_vacina)
+            try:
+                cursor.execute(sql, dados)
+            except Error as e:
+                aviso = messagebox.showerror(title="ERRO", message="Não foi possível salvar as alterações \nErro: " + str(e))
+            #dando commit
+            conexao.commit()
+            #fechando a conexao
+            conexao.close()
+            my_tree.delete(*my_tree.get_children())
+            query_database("vacinas")
+
+
+        elif tabela == "vacinacao":
+            #atualizando o banco
+            sql = "UPDATE vacinacao SET vacina_id = %s, animais_tag = %s, data = %s WHERE id = %s "
+
+            id = str(id_vacinacao_entry.get())
+            vacinafk_id = str(vacinafk_id_entry.get())
+            animaisfk_tag = str(animaisfk_tag_entry.get())
+            data_vacinacao = str(data_vacinacao_entry.get())
+
+            dados = (vacinafk_id, animaisfk_tag, data_vacinacao, id)
+            try:
+                cursor.execute(sql, dados)
+            except Error as e:
+                aviso = messagebox.showerror(title="ERRO", message="Não foi possível salvar as alterações \nErro: " + str(e))
+            #dando commit
+            conexao.commit()
+            #fechando a conexao
+            conexao.close()
+            my_tree.delete(*my_tree.get_children())
+            query_database("vacinacao")
+
+
+        elif tabela == "estoque":
+            #atualizando o banco
+            sql = "UPDATE estoque SET item = %s, quantidade = %s WHERE id = %s "
+
+            id = str(id_estoque_entry.get())
+            item = str(item_entry.get())
+            quantidade = str(quantidade_entry.get())
+
+            dados = (item, quantidade, id)
+            try:
+                cursor.execute(sql, dados)
+            except Error as e:
+                aviso = messagebox.showerror(title="ERRO", message="Não foi possível salvar as alterações \nErro: " + str(e))
+            #dando commit
+            conexao.commit()
+            #fechando a conexao
+            conexao.close()
+            my_tree.delete(*my_tree.get_children())
+            query_database("estoque")
+
+
+        elif tabela == "problemas_gestacao":
+            #atualizando o banco
+            sql = "UPDATE problemas_gestacao SET nome = %s, descricao = %s WHERE id = %s "
+
+            id = str(id_prob_gest_entry.get())
+            nome = str(nome_prob_gest_entry.get())
+            descricao = str(descricao_prob_gest_entry.get())
+
+            dados = (nome, descricao, id)
+            try:
+                cursor.execute(sql, dados)
+            except Error as e:
+                aviso = messagebox.showerror(title="ERRO", message="Não foi possível salvar as alterações \nErro: " + str(e))
+            #dando commit
+            conexao.commit()
+            #fechando a conexao
+            conexao.close()
+            my_tree.delete(*my_tree.get_children())
+            query_database("problemas_gestacao")
+
+
+        elif tabela == "gestacao":
+            #atualizando o banco
+            sql = "UPDATE gestacao SET a_tag = %s, pg_id = %s, descricao = %s, data = %s WHERE id = %s "
+
+            id = str(id_gestacao_entry.get())
+            a_tag = str(gestacao_tag_entry.get())
+            pg_id = str(pgid_gestacao_entry.get())
+            descricao = str(descricao_gestacao_entry.get())
+            data = str(data_gestacao_entry.get())
+
+            dados = (a_tag, pg_id, descricao, data, id)
+            try:
+                cursor.execute(sql, dados)
+            except Error as e:
+                aviso = messagebox.showerror(title="ERRO", message="Não foi possível salvar as alterações \nErro: " + str(e))
+            #dando commit
+            conexao.commit()
+            #fechando a conexao
+            conexao.close()
+            my_tree.delete(*my_tree.get_children())
+            query_database("gestacao")
+
+        
+        elif tabela == "fornecedores":
+            #atualizando o banco
+            sql = "UPDATE fornecedores SET nome = %s, cidade = %s, endereco = %s, telefone = %s WHERE cnpj = %s "
+
+            cnpj = str(cnpj_fornecedor_entry.get())
+            nome = str(nome_fornecedor_entry.get())
+            cidade = str(cidade_fornecedor_entry.get())
+            endereco = str(endereco_fornecedor_entry.get())
+            telefone = str(telefone_fornecedor_entry.get())
+
+            dados = (nome, cidade, endereco, telefone, cnpj)
+            try:
+                cursor.execute(sql, dados)
+            except Error as e:
+                aviso = messagebox.showerror(title="ERRO", message="Não foi possível salvar as alterações \nErro: " + str(e))
+            #dando commit
+            conexao.commit()
+            #fechando a conexao
+            conexao.close()
+            my_tree.delete(*my_tree.get_children())
+            query_database("forncedores")
+
+
+        elif tabela == "transacao":
+            #atualizando o banco
+            sql = "UPDATE transacao SET f_id = %s, e_id = %s, data = %s, quantidade = %s, valor_unitario = %s WHERE id = %s "
+
+            id = str(id_transacao_entry.get())
+            f_id = str(f_id_transacao_entry.get())
+            e_id = str(e_id_transacao_entry.get())
+            data = str(data_transacao_entry.get())
+            quantidade = str(quantidade_transacao_entry.get())
+            valor_unitario = str(valor_unitario_transacao_entry.get())
+
+            dados = (f_id, e_id, data, quantidade, valor_unitario, id)
+            try:
+                cursor.execute(sql, dados)
+            except Error as e:
+                aviso = messagebox.showerror(title="ERRO", message="Não foi possível salvar as alterações \nErro: " + str(e))
+            #dando commit
+            conexao.commit()
+            #fechando a conexao
+            conexao.close()
+            my_tree.delete(*my_tree.get_children())
+            query_database("transacao")
         
         
         
@@ -346,8 +491,8 @@ def remover(tabela, pk, pk_entry):
         dados = (tabela, primary_key, primary_key_value)
         print(dados)
         try:
-            #cursor.execute(sql, dados)
-            cursor.execute()
+            cursor.execute(sql, dados)
+            #cursor.execute()
             #cursor.execute("DELETE FROM animais WHERE tag=11")
         except Error as a:
             aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel remover o item \nErro: " + str(a))
@@ -382,7 +527,8 @@ def adicionar_ao_banco(tabela):
         valores = (str(cpf_entry.get()), str(nome_entry.get()), str(telefone_entry.get()), str(endereco_entry.get()), str(salario_entry.get()), str(carteira_trabalho_entry.get()), str(cargo_entry.get()))
 
         cursor.execute(sql, valores)
-
+        conexao.commit()
+        conexao.close()
         my_tree.delete(*my_tree.get_children())
         query_database("funcionarios")
 
@@ -391,16 +537,18 @@ def adicionar_ao_banco(tabela):
         valores = (str(tag_entry.get()), str(tipo_entry.get()), str(data_nascimento_entry.get()), str(peso_entry.get()), str(sexo_entry.get()), str(mae_tag_entry.get()), str(pai_tag_entry.get()))
 
         cursor.execute(sql, valores)
-
+        conexao.commit()
+        conexao.close()
         my_tree.delete(*my_tree.get_children())
         query_database("animais")
 
     elif tabela == "vacinas":
         sql = "INSERT INTO vacinas (id, nome, reforco) VALUES (%s, %s, %s)"
-        valores = (str(id_vacina_entry.get()), str(nome_entry.get()), str(reforco_entry.get()))
+        valores = (str(id_vacina_entry.get()), str(nome_vacina_entry.get()), str(reforco_entry.get()))
 
         cursor.execute(sql, valores)
-
+        conexao.commit()
+        conexao.close()
         my_tree.delete(*my_tree.get_children())
         query_database("vacinas")
 
@@ -409,7 +557,8 @@ def adicionar_ao_banco(tabela):
         valores = (str(id_vacinacao_entry.get()), str(vacinafk_id_entry.get()), str(animaisfk_tag_entry.get()), str(data_vacinacao_entry.get()))
 
         cursor.execute(sql, valores)
-
+        conexao.commit()
+        conexao.close()
         my_tree.delete(*my_tree.get_children())
         query_database("vacinacao")
 
@@ -418,7 +567,8 @@ def adicionar_ao_banco(tabela):
         valores = (str(id_estoque_entry.get()), str(item_entry.get()), str(quantidade_entry.get()))
 
         cursor.execute(sql, valores)
-
+        conexao.commit()
+        conexao.close()
         my_tree.delete(*my_tree.get_children())
         query_database("estoque")
 
@@ -427,7 +577,8 @@ def adicionar_ao_banco(tabela):
         valores = (str(id_prob_gest_entry.get()), str(nome_prob_gest_entry.get()), str(descricao_prob_gest_entry.get()))
 
         cursor.execute(sql, valores)
-
+        conexao.commit()
+        conexao.close()
         my_tree.delete(*my_tree.get_children())
         query_database("problemas_gestacao")
 
@@ -436,7 +587,8 @@ def adicionar_ao_banco(tabela):
         valores = (str(id_gestacao_entry.get()), str(gestacao_tag_entry.get()), str(pgid_gestacao_entry.get()), str(descricao_gestacao_entry.get()), str(data_gestacao_entry.get()))
 
         cursor.execute(sql, valores)
-
+        conexao.commit()
+        conexao.close()
         my_tree.delete(*my_tree.get_children())
         query_database("gestacao")
 
@@ -445,9 +597,11 @@ def adicionar_ao_banco(tabela):
         valores = (str(cnpj_fornecedor_entry.get()), str(nome_fornecedor_entry.get()), str(cidade_fornecedor_entry.get()), str(endereco_fornecedor_entry.get()), str(telefone_fornecedor_entry.get()))
 
         cursor.execute(sql, valores)
-
+        conexao.commit()
+        conexao.close()
         my_tree.delete(*my_tree.get_children())
         query_database("fornecedores")
+        
 
     elif tabela == "transacao":
         sql = "INSERT INTO transacao (id, f_id, e_id, data, quantidade, valor_unitario) VALUES (%s, %s, %s, %s, %s, %s)"
@@ -456,10 +610,11 @@ def adicionar_ao_banco(tabela):
         cursor.execute(sql, valores)
 
         my_tree.delete(*my_tree.get_children())
+        
+        conexao.commit()
+        conexao.close()
         query_database("transacao")
 
-    conexao.commit()
-    conexao.close()
 
 
 #-----------------------------------------------------------------------------------------
@@ -812,7 +967,7 @@ def janela_vacinas():
     cria_menu()
     def selecionar_dados_arvore(e):
         id_vacina_entry.delete(0, END)
-        nome_entry.delete(0, END)
+        nome_vacina_entry.delete(0, END)
         reforco_entry.delete(0, END)
         
 
@@ -821,7 +976,7 @@ def janela_vacinas():
         valor = my_tree.item(selecionado, 'values')
 
         id_vacina_entry.insert(0, valor[0])
-        nome_entry.insert(0, valor[1])
+        nome_vacina_entry.insert(0, valor[1])
         reforco_entry.insert(0, valor[2])
         
     root.geometry("910x470")
@@ -874,11 +1029,11 @@ def janela_vacinas():
     id_vacina_label.grid(row=0, column=0, padx=10, pady=10)
     id_vacina_entry = Entry(data_frame)
     id_vacina_entry.grid(row=0, column=1, padx=10, pady=10)
-    global nome_entry
-    nome_label = Label(data_frame, text="Nome")
-    nome_label.grid(row=0, column=2, padx=10, pady=10)
-    nome_entry = Entry(data_frame)
-    nome_entry.grid(row=0, column=3, padx=10, pady=10)
+    global nome_vacina_entry
+    nome_vacina_label = Label(data_frame, text="Nome")
+    nome_vacina_label.grid(row=0, column=2, padx=10, pady=10)
+    nome_vacina_entry = Entry(data_frame)
+    nome_vacina_entry.grid(row=0, column=3, padx=10, pady=10)
     global reforco_entry
     reforco_label = Label(data_frame, text="Reforço")
     reforco_label.grid(row=0, column=4, padx=10, pady=10)
@@ -891,7 +1046,7 @@ def janela_vacinas():
     button_frame = LabelFrame(root, text="Ações")
     button_frame.pack(fill="x", expand="yes", padx=20)
 
-    update_button = Button(button_frame, text="Atualizar")
+    update_button = Button(button_frame, text="Atualizar", command=lambda:atualizar_dados("vacinas"))
     update_button.grid(row=0 , column=0 , padx=10, pady=10)
 
     add_button = Button(button_frame, text="Adicionar", command=lambda:adicionar_ao_banco("vacinas"))
@@ -1106,7 +1261,7 @@ def janela_estoque():
     button_frame = LabelFrame(root, text="Ações")
     button_frame.pack(fill="x", expand="yes", padx=20)
 
-    update_button = Button(button_frame, text="Atualizar")
+    update_button = Button(button_frame, text="Atualizar", command=lambda:atualizar_dados("estoque"))
     update_button.grid(row=0 , column=0 , padx=10, pady=10)
 
     add_button = Button(button_frame, text="Adicionar", command=lambda:adicionar_ao_banco("estoque"))
@@ -1440,13 +1595,13 @@ def janela_fornecedores():
     global endereco_fornecedor_entry
     endereco_fornecedor_label = Label(data_frame, text="Endereço")
     endereco_fornecedor_label.grid(row=1, column=0, padx=10, pady=10)
-    endereco_fornecedor_entry = Entry(data_frame)
-    endereco_fornecedor_entry.grid(row=1, column=1, padx=10, pady=10)
+    endereco_fornecedor_entry = Entry(data_frame, width=55)
+    endereco_fornecedor_entry.grid(row=1, column=1, padx=10, pady=10, columnspan=3)
     global telefone_fornecedor_entry
     telefone_fornecedor_label = Label(data_frame, text="Telefone")
-    telefone_fornecedor_label.grid(row=1, column=2, padx=10, pady=10)
+    telefone_fornecedor_label.grid(row=1, column=4, padx=10, pady=10)
     telefone_fornecedor_entry = Entry(data_frame)
-    telefone_fornecedor_entry.grid(row=1, column=3, padx=10, pady=10)
+    telefone_fornecedor_entry.grid(row=1, column=5, padx=10, pady=10)
     
     query_database("fornecedores")
 
