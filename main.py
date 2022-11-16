@@ -1684,7 +1684,10 @@ def janela_filhos():
     for widgets in root.winfo_children():
         widgets.destroy()
     cria_menu()
+    root.geometry("600x500")
     def escolher_animal_mae(tipo, escolhido):
+        for widgets in frame2_parentes.winfo_children():
+            widgets.destroy()
         conexao = mysql.connector.connect(
             host = "localhost",
             user = "root",
@@ -1693,8 +1696,6 @@ def janela_filhos():
         )
         #criando o cursor
         cursor = conexao.cursor()
-        
-
         if tipo == "mae_tag":
             sql = "SELECT * FROM animais WHERE mae_tag = %s"
             animal = (str(escolhido), )
@@ -1706,8 +1707,11 @@ def janela_filhos():
             except Error as e:
                 print(e)
             resultado = cursor.fetchall()
-            resultado_label = Label(frame_parentes, text=str(resultado))
-            resultado_label.grid(row=6, column=0, columnspan=20, pady=10)
+            num = 0
+            for item in resultado:
+                resultado_filhos_label = Label(frame2_parentes, text=str(resultado[num][0]))
+                resultado_filhos_label.grid(row=num, column=0, columnspan=20, pady=10)
+                num += 1
         
         elif tipo == "pai_tag":
             sql = "SELECT * FROM animais WHERE pai_tag = %s"
@@ -1720,8 +1724,11 @@ def janela_filhos():
             except Error as e:
                 print(e)
             resultado = cursor.fetchall()
-            resultado_label = Label(frame_parentes, text=str(resultado))
-            resultado_label.grid(row=6, column=0, columnspan=20, pady=10)
+            num = 0
+            for item in resultado:
+                resultado_filhos_label = Label(frame2_parentes, text=str(resultado[num][0]))
+                resultado_filhos_label.grid(row=num, column=0, columnspan=20, pady=10)
+                num += 1
         
         elif tipo  == "tag":
             sql = "SELECT mae_tag, pai_tag FROM animais WHERE tag = %s"
@@ -1734,8 +1741,11 @@ def janela_filhos():
             except Error as e:
                 print(e)
             resultado = cursor.fetchall()
-            resultado_label = Label(frame_parentes, text=str(resultado))
-            resultado_label.grid(row=6, column=0, columnspan=20, pady=10)
+            num = 0
+            for item in resultado:
+                resultado_filhos_label = Label(frame2_parentes, text="Mãe = " + str(resultado[num][0]) + "\nPai =  " + str(resultado[num][1]) )
+                resultado_filhos_label.grid(row=num, column=0, columnspan=20, pady=10)
+                num += 1
         
         elif tipo == "materno":
             condicao = (str(escolhido))
@@ -1750,35 +1760,58 @@ def janela_filhos():
                 resultado = cursor.fetchall()
                 condicao = resultado[0][0]
                 print(condicao)
-                resultado_label = Label(frame_parentes, text=str(condicao))
-                resultado_label.grid(row=num+6, column=1, columnspan=20, pady=10)
+                resultado_filhos_label = Label(frame2_parentes, text=str(condicao))
+                resultado_filhos_label.grid(row=num, column=1, columnspan=20, pady=10)
+                num +=1
+
+        else:
+            condicao = (str(escolhido))
+            num = 0
+            while condicao != 0:
+                sql = "SELECT pai_tag FROM animais WHERE tag = %s"
+                animal = (condicao, )
+                try:
+                    cursor.execute(sql, animal)
+                except Error as e:
+                    print(e)
+                resultado = cursor.fetchall()
+                condicao = resultado[0][0]
+                print(condicao)
+                resultado_filhos_label = Label(frame2_parentes, text=str(condicao))
+                resultado_filhos_label.grid(row=num, column=1, columnspan=20, pady=10)
                 num +=1
         
         
         conexao.commit()
         conexao.close()
         print(resultado[0][0])
-
-    frame_parentes = Frame(root)
-    frame_parentes.pack(pady=10, padx=10, fill="x", expand="yes")
-
-    animal_parente_label = Label(frame_parentes, text="Animal ")
-    animal_parente_label.grid(row=0, column=0, pady=10)
+    
+    frame_parentes = LabelFrame(root, text="O que você quer saber?")
+    frame_parentes.pack(pady=10, padx=10, fill="x", expand="yes", side="top")
+    
+    animal_parente_label = Label(frame_parentes, text="Número do brinco: ")
+    animal_parente_label.grid(row=0, column=1)
 
     animal_parente_entry = Entry(frame_parentes)
-    animal_parente_entry.grid(row=0, column=1, pady=10)
+    animal_parente_entry.grid(row=1, column=1)
+    
     escolha_radio = StringVar()
     escolha_radio.set("mae_tag")
-    Radiobutton(frame_parentes, text="Filhos Vaca", variable=escolha_radio, value="mae_tag").grid(row=1,column=0)
+    Radiobutton(frame_parentes, text="Filhos Vaca", variable=escolha_radio, value="mae_tag").grid(row=0,column=0, sticky=W, padx=10)
     
-    Radiobutton(frame_parentes, text="Filhos Boi", variable=escolha_radio, value="pai_tag").grid(row=2,column=0)
+    Radiobutton(frame_parentes, text="Filhos Boi", variable=escolha_radio, value="pai_tag").grid(row=1,column=0, sticky=W, padx=10)
     
-    Radiobutton(frame_parentes, text="Parentes", variable=escolha_radio, value="tag").grid(row=3,column=0)
+    Radiobutton(frame_parentes, text="Parentes", variable=escolha_radio, value="tag").grid(row=2,column=0, sticky=W, padx=10)
     
-    Radiobutton(frame_parentes, text="Parentesco Materno", variable=escolha_radio, value="materno").grid(row=4,column=0)
+    Radiobutton(frame_parentes, text="Parentesco Materno", variable=escolha_radio, value="materno").grid(row=3,column=0, sticky=W, padx=10)
 
-    botao_escolher = Button(frame_parentes, text="Mostrar", command=lambda:escolher_animal_mae(escolha_radio.get(), animal_parente_entry.get()))
-    botao_escolher.grid(row=5, column=0)
+    Radiobutton(frame_parentes, text="Parentesco Paterno", variable=escolha_radio, value="paterno").grid(row=4,column=0, sticky=W, padx=10)
+
+    botao_escolher = Button(frame_parentes, text="Pesquisar", command=lambda:escolher_animal_mae(escolha_radio.get(), animal_parente_entry.get()), padx=10)
+    botao_escolher.grid(row=2, column=1)
+    
+    frame2_parentes = LabelFrame(root, text="Resultado")
+    frame2_parentes.pack(pady=10, padx=10, fill="x", expand="yes")
 
 
 #-----------------------------------------------------------------------------------------
