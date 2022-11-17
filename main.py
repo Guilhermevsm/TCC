@@ -253,8 +253,6 @@ def query_database(tabela):
                 my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][2], dados[num][3]), tags=('oddrow', ))
             num += 1
 
-    
-
     #dando commit
     conexao.commit()
 
