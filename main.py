@@ -67,7 +67,10 @@ def cria_menu():
 
     menu_backup = Menu(menu_principal, tearoff=0)
     menu_principal.add_cascade(label="Backup", menu=menu_backup)
-    menu_backup.add_command(label="Fazer Backup", command=fazer_backup)
+    sub_menu = Menu(menu_backup, tearoff=0)
+    menu_backup.add_cascade(label="Fazer Backup", menu=sub_menu)
+    sub_menu.add_command(label="Tudo", command=fazer_backup)
+
     menu_backup.add_command(label="Restaurar Backup")
     menu_backup.add_separator()
     menu_backup.add_command(label="Sair", command=root.quit)
@@ -232,6 +235,25 @@ def query_database(tabela):
                 my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][2], dados[num][3]), tags=('oddrow', ))
             num += 1
 
+    elif tabela == "vacina_vacinado":
+        vacina = str(vacinados_tag_entry.get())
+        
+        try:
+            cursor.execute("SELECT * FROM vacinados WHERE nome = %s ", (vacina, ))
+        except Error as e:
+            aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel se conectar ao banco de dados \nErro: " + str(e))
+            print("Conexão com o banco não foi sucedida!")
+        dados = cursor.fetchall()
+
+        num = 0
+        for itens in dados:
+            if num % 2 == 0:
+                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][2], dados[num][3]), tags=('evenrow', ))
+            else:
+                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][2], dados[num][3]), tags=('oddrow', ))
+            num += 1
+
+    
 
     #dando commit
     conexao.commit()
@@ -459,9 +481,6 @@ def atualizar_dados(tabela):
             conexao.close()
             my_tree.delete(*my_tree.get_children())
             query_database("transacao")
-        
-        
-        
            
     else:
         aviso = messagebox.showinfo(title="Update", message="Nada foi alterado")
@@ -680,9 +699,8 @@ def fazer_backup():
             except Error as e:
                 aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
             resultado = cursor.fetchall()
-            with open('backup.csv', 'a', newline='') as arquivo_backup:
+            with open('backup_animais.csv', 'a', newline='') as arquivo_backup:
                 arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
-                arquivo_backup.writerow(nome)
                 for item in resultado:
                     arquivo_backup.writerow(item)
 
@@ -692,9 +710,8 @@ def fazer_backup():
             except Error as e:
                 aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
             resultado = cursor.fetchall()
-            with open('backup.csv', 'a', newline='') as arquivo_backup:
+            with open('backup_funcionarios.csv', 'a', newline='') as arquivo_backup:
                 arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
-                arquivo_backup.writerow(nome)
                 for item in resultado:
                     arquivo_backup.writerow(item)
 
@@ -704,9 +721,8 @@ def fazer_backup():
             except Error as e:
                 aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
             resultado = cursor.fetchall()
-            with open('backup.csv', 'a', newline='') as arquivo_backup:
+            with open('backup_vacinas.csv', 'a', newline='') as arquivo_backup:
                 arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
-                arquivo_backup.writerow(nome)
                 for item in resultado:
                     arquivo_backup.writerow(item)
 
@@ -716,9 +732,8 @@ def fazer_backup():
             except Error as e:
                 aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
             resultado = cursor.fetchall()
-            with open('backup.csv', 'a', newline='') as arquivo_backup:
+            with open('backup_vacinacao.csv', 'a', newline='') as arquivo_backup:
                 arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
-                arquivo_backup.writerow(nome)
                 for item in resultado:
                     arquivo_backup.writerow(item)
 
@@ -728,9 +743,8 @@ def fazer_backup():
             except Error as e:
                 aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
             resultado = cursor.fetchall()
-            with open('backup.csv', 'a', newline='') as arquivo_backup:
+            with open('backup_estoque.csv', 'a', newline='') as arquivo_backup:
                 arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
-                arquivo_backup.writerow(nome)
                 for item in resultado:
                     arquivo_backup.writerow(item)
 
@@ -740,9 +754,8 @@ def fazer_backup():
             except Error as e:
                 aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
             resultado = cursor.fetchall()
-            with open('backup.csv', 'a', newline='') as arquivo_backup:
+            with open('backup_problemasgest.csv', 'a', newline='') as arquivo_backup:
                 arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
-                arquivo_backup.writerow(nome)
                 for item in resultado:
                     arquivo_backup.writerow(item)
 
@@ -752,9 +765,8 @@ def fazer_backup():
             except Error as e:
                 aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
             resultado = cursor.fetchall()
-            with open('backup.csv', 'a', newline='') as arquivo_backup:
+            with open('backup_gestacao.csv', 'a', newline='') as arquivo_backup:
                 arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
-                arquivo_backup.writerow(nome)
                 for item in resultado:
                     arquivo_backup.writerow(item)
 
@@ -764,9 +776,8 @@ def fazer_backup():
             except Error as e:
                 aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
             resultado = cursor.fetchall()
-            with open('backup.csv', 'a', newline='') as arquivo_backup:
+            with open('backup_fornecedores.csv', 'a', newline='') as arquivo_backup:
                 arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
-                arquivo_backup.writerow(nome)
                 for item in resultado:
                     arquivo_backup.writerow(item)
 
@@ -776,16 +787,14 @@ def fazer_backup():
             except Error as e:
                 aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
             resultado = cursor.fetchall()
-            with open('backup.csv', 'a', newline='') as arquivo_backup:
+            with open('backup_transacao.csv', 'a', newline='') as arquivo_backup:
                 arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
-                arquivo_backup.writerow(nome)
                 for item in resultado:
                     arquivo_backup.writerow(item)
 
     conexao.commit()
     conexao.close()
     aviso = messagebox.showinfo(title="Backup", message="Backup feito com sucesso!")
-
 
 
 #-----------------------------------------------------------------------------------------
@@ -983,10 +992,6 @@ def janela_funcionarios():
     remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("funcionarios","cpf", str(cpf_entry.get())))
     remove_all_button.grid(row=0 , column=2 , padx=10, pady=10)
 
-
-    clear_box_button = Button(button_frame, text="Limpar")
-    clear_box_button.grid(row=0 , column=7 , padx=10, pady=10)
-
     #bind th treeview
     my_tree.bind("<ButtonRelease-1>", selecionar_dados_arvore)
 
@@ -1122,9 +1127,6 @@ def janela_animais():
     remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("animais","tag", tag_entry.get()))
     remove_all_button.grid(row=0 , column=2 , padx=10, pady=10)
 
-    clear_box_button = Button(button_frame, text="Limpar")
-    clear_box_button.grid(row=0 , column=7 , padx=10, pady=10)
-
     #bind th treeview
     my_tree.bind("<ButtonRelease-1>", selecionar_dados_arvore)
 
@@ -1225,9 +1227,6 @@ def janela_vacinas():
 
     remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("vacinas","id", id_vacina_entry.get()))
     remove_all_button.grid(row=0 , column=2 , padx=10, pady=10)
-
-    clear_box_button = Button(button_frame, text="Limpar")
-    clear_box_button.grid(row=0 , column=7 , padx=10, pady=10)
 
     #bind th treeview
     my_tree.bind("<ButtonRelease-1>", selecionar_dados_arvore)
@@ -1338,9 +1337,6 @@ def janela_vacinacao():
     remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("vacinacao","id", id_vacinacao_entry.get()))
     remove_all_button.grid(row=0 , column=2 , padx=10, pady=10)
 
-    clear_box_button = Button(button_frame, text="Limpar")
-    clear_box_button.grid(row=0 , column=7 , padx=10, pady=10)
-
     #bind th treeview
     my_tree.bind("<ButtonRelease-1>", selecionar_dados_arvore)
 
@@ -1440,10 +1436,6 @@ def janela_estoque():
 
     remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("estoque","id", id_estoque_entry.get()))
     remove_all_button.grid(row=0 , column=2 , padx=10, pady=10)
-
-
-    clear_box_button = Button(button_frame, text="Limpar")
-    clear_box_button.grid(row=0 , column=7 , padx=10, pady=10)
 
     #bind th treeview
     my_tree.bind("<ButtonRelease-1>", selecionar_dados_arvore)
@@ -1545,10 +1537,6 @@ def janela_problemas_gestacao():
 
     remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("problemas_gestacao","id", id_prob_gest_entry.get()))
     remove_all_button.grid(row=0 , column=2 , padx=10, pady=10)
-
-
-    clear_box_button = Button(button_frame, text="Limpar")
-    clear_box_button.grid(row=0 , column=7 , padx=10, pady=10)
 
     #bind th treeview
     my_tree.bind("<ButtonRelease-1>", selecionar_dados_arvore)
@@ -1668,9 +1656,6 @@ def janela_gestacao():
     remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("gestacao","id", id_gestacao_entry.get()))
     remove_all_button.grid(row=0 , column=2 , padx=10, pady=10)
 
-    clear_box_button = Button(button_frame, text="Limpar")
-    clear_box_button.grid(row=0 , column=7 , padx=10, pady=10)
-
     #bind th treeview
     my_tree.bind("<ButtonRelease-1>", selecionar_dados_arvore)
 
@@ -1788,9 +1773,6 @@ def janela_fornecedores():
 
     remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("fornecedores","cnpj", cnpj_fornecedor_entry.get()))
     remove_all_button.grid(row=0 , column=2 , padx=10, pady=10)
-
-    clear_box_button = Button(button_frame, text="Limpar")
-    clear_box_button.grid(row=0 , column=7 , padx=10, pady=10)
 
     #bind th treeview
     my_tree.bind("<ButtonRelease-1>", selecionar_dados_arvore)
@@ -1918,9 +1900,6 @@ def janela_transacao():
     remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("transacao","id", id_transacao_entry.get()))
     remove_all_button.grid(row=0 , column=2 , padx=10, pady=10)
 
-    clear_box_button = Button(button_frame, text="Limpar")
-    clear_box_button.grid(row=0 , column=7 , padx=10, pady=10)
-
     #bind th treeview
     my_tree.bind("<ButtonRelease-1>", selecionar_dados_arvore)
 
@@ -1985,7 +1964,7 @@ def janela_vacinados():
     #adicionando botões
     selecinonar_frame = LabelFrame(root, text="Escolher")
     selecinonar_frame.pack(fill="x", expand="yes", padx=20)
-    my_label = Label(selecinonar_frame, text="Escolher Animal")
+    my_label = Label(selecinonar_frame, text="Escolher Animal ou Vacina")
     my_label.grid(row=0, column=0, pady=10)
     global vacinados_tag_entry
     vacinados_tag_entry = Entry(selecinonar_frame)
@@ -1995,11 +1974,14 @@ def janela_vacinados():
     button_frame = LabelFrame(root, text="Ações")
     button_frame.pack(fill="x", expand="yes", padx=20)
 
-    update_button = Button(button_frame, text="Selecionar", command=lambda:query_database("animal_vacinado"))
+    update_button = Button(button_frame, text="Selecionar Animal", command=lambda:query_database("animal_vacinado"))
     update_button.grid(row=0 , column=0 , padx=10, pady=10)
 
+    update2_button = Button(button_frame, text="Selecionar Vacina", command=lambda:query_database("vacina_vacinado"))
+    update2_button.grid(row=0 , column=1 , padx=10, pady=10)
+
     limpar_button = Button(button_frame, text="Restaurar Tabela", command=lambda:query_database("vacinados"))
-    limpar_button.grid(row=0 , column=1 , padx=10, pady=10)
+    limpar_button.grid(row=0 , column=2 , padx=10, pady=10)
     
 
 #-----------------------------------------------------------------------------------------
