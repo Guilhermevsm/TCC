@@ -5,6 +5,7 @@ from mysql.connector import Error
 from tkinter import messagebox
 from scipy.optimize import linprog
 import csv
+import os
 
 root = Tk()
 root.title('Casima Agrícola')
@@ -21,17 +22,12 @@ try:
     )
     #criando o cursor
     cursor = conexao.cursor()
-    
     #dando commit
     conexao.commit()
-
     #fechando a conexa
     conexao.close()
-
-    #print("Conexão com o banco feita com sucesso!")
 except Error as e:
     aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel se conectar ao banco de dados \nErro: " + str(e))
-    #print("Conexão com o banco não foi sucedida!")
 
 #-----------------------------------------------------------------------------------------
 
@@ -71,7 +67,7 @@ def cria_menu():
     menu_backup.add_cascade(label="Fazer Backup", menu=sub_menu)
     sub_menu.add_command(label="Tudo", command=fazer_backup)
 
-    menu_backup.add_command(label="Restaurar Backup")
+    menu_backup.add_command(label="Restaurar Backup", command=restaurar_backup)
     menu_backup.add_separator()
     menu_backup.add_command(label="Sair", command=root.quit)
 
@@ -674,126 +670,277 @@ def adicionar_ao_banco(tabela):
 
 #-----------------------------------------------------------------------------------------
 
-#janela para fazer um backup do banco em um arquivo csv
+#funcao para fazer um backup do banco em varios arquivos csv
 def fazer_backup():
     try:
-        conexao = mysql.connector.connect(
-            host = "localhost",
-            user = "root",
-            passwd = "aneis1961",
-            database = "casima"
-        )
-        #criando o cursor
-        cursor = conexao.cursor()
-    except Error as e:
-        aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel se conectar ao banco de dados \nErro: " + str(e))
-
-    tabelas = ["animais", "funcionarios", "vacinas", "vacinacao", "estoque", "problemas_gestacao", "gestacao", "fornecedores", "transacao"]
+        os.remove("backup_animais.csv")
+        os.remove("backup_estoque.csv")
+        os.remove("backup_fornecedores.csv")
+        os.remove("backup_funcionarios.csv")
+        os.remove("backup_gestacao.csv")
+        os.remove("backup_problemasgest.csv")
+        os.remove("backup_transacao.csv")
+        os.remove("backup_vacinacao.csv")
+        os.remove("backup_vacinas.csv")
     
-    for nome in tabelas:
-        if nome == "animais":
-            try:
-                cursor.execute("SELECT * FROM animais")
-            except Error as e:
-                aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
-            resultado = cursor.fetchall()
-            with open('backup_animais.csv', 'a', newline='') as arquivo_backup:
-                arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
-                for item in resultado:
-                    arquivo_backup.writerow(item)
+    finally:
+        try:
+            conexao = mysql.connector.connect(
+                host = "localhost",
+                user = "root",
+                passwd = "aneis1961",
+                database = "casima"
+            )
+            #criando o cursor
+            cursor = conexao.cursor()
+        except Error as e:
+            aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel se conectar ao banco de dados \nErro: " + str(e))
 
-        elif nome == "funcionarios":
-            try:
-                cursor.execute("SELECT * FROM funcionarios")
-            except Error as e:
-                aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
-            resultado = cursor.fetchall()
-            with open('backup_funcionarios.csv', 'a', newline='') as arquivo_backup:
-                arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
-                for item in resultado:
-                    arquivo_backup.writerow(item)
+        tabelas = ["animais", "funcionarios", "vacinas", "vacinacao", "estoque", "problemas_gestacao", "gestacao", "fornecedores", "transacao"]
+        
+        for nome in tabelas:
+            if nome == "animais":
+                try:
+                    cursor.execute("SELECT * FROM animais")
+                except Error as e:
+                    aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
+                resultado = cursor.fetchall()
+                with open('backup_animais.csv', 'a', newline='') as arquivo_backup:
+                    arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
+                    for item in resultado:
+                        arquivo_backup.writerow(item)
 
-        elif nome == "vacinas":
-            try:
-                cursor.execute("SELECT * FROM vacinas")
-            except Error as e:
-                aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
-            resultado = cursor.fetchall()
-            with open('backup_vacinas.csv', 'a', newline='') as arquivo_backup:
-                arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
-                for item in resultado:
-                    arquivo_backup.writerow(item)
+            elif nome == "funcionarios":
+                try:
+                    cursor.execute("SELECT * FROM funcionarios")
+                except Error as e:
+                    aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
+                resultado = cursor.fetchall()
+                with open('backup_funcionarios.csv', 'a', newline='') as arquivo_backup:
+                    arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
+                    for item in resultado:
+                        arquivo_backup.writerow(item)
 
-        elif nome == "vacinacao":
-            try:
-                cursor.execute("SELECT * FROM vacinacao")
-            except Error as e:
-                aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
-            resultado = cursor.fetchall()
-            with open('backup_vacinacao.csv', 'a', newline='') as arquivo_backup:
-                arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
-                for item in resultado:
-                    arquivo_backup.writerow(item)
+            elif nome == "vacinas":
+                try:
+                    cursor.execute("SELECT * FROM vacinas")
+                except Error as e:
+                    aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
+                resultado = cursor.fetchall()
+                with open('backup_vacinas.csv', 'a', newline='') as arquivo_backup:
+                    arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
+                    for item in resultado:
+                        arquivo_backup.writerow(item)
 
-        elif nome == "estoque":
-            try:
-                cursor.execute("SELECT * FROM estoque")
-            except Error as e:
-                aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
-            resultado = cursor.fetchall()
-            with open('backup_estoque.csv', 'a', newline='') as arquivo_backup:
-                arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
-                for item in resultado:
-                    arquivo_backup.writerow(item)
+            elif nome == "vacinacao":
+                try:
+                    cursor.execute("SELECT * FROM vacinacao")
+                except Error as e:
+                    aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
+                resultado = cursor.fetchall()
+                with open('backup_vacinacao.csv', 'a', newline='') as arquivo_backup:
+                    arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
+                    for item in resultado:
+                        arquivo_backup.writerow(item)
 
-        elif nome == "problemas_gestacao":
-            try:
-                cursor.execute("SELECT * FROM problemas_gestacao")
-            except Error as e:
-                aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
-            resultado = cursor.fetchall()
-            with open('backup_problemasgest.csv', 'a', newline='') as arquivo_backup:
-                arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
-                for item in resultado:
-                    arquivo_backup.writerow(item)
+            elif nome == "estoque":
+                try:
+                    cursor.execute("SELECT * FROM estoque")
+                except Error as e:
+                    aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
+                resultado = cursor.fetchall()
+                with open('backup_estoque.csv', 'a', newline='') as arquivo_backup:
+                    arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
+                    for item in resultado:
+                        arquivo_backup.writerow(item)
 
-        elif nome == "gestacao":
-            try:
-                cursor.execute("SELECT * FROM gestacao")
-            except Error as e:
-                aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
-            resultado = cursor.fetchall()
-            with open('backup_gestacao.csv', 'a', newline='') as arquivo_backup:
-                arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
-                for item in resultado:
-                    arquivo_backup.writerow(item)
+            elif nome == "problemas_gestacao":
+                try:
+                    cursor.execute("SELECT * FROM problemas_gestacao")
+                except Error as e:
+                    aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
+                resultado = cursor.fetchall()
+                with open('backup_problemasgest.csv', 'a', newline='') as arquivo_backup:
+                    arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
+                    for item in resultado:
+                        arquivo_backup.writerow(item)
 
-        elif nome == "fornecedores":
-            try:
-                cursor.execute("SELECT * FROM fornecedores")
-            except Error as e:
-                aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
-            resultado = cursor.fetchall()
-            with open('backup_fornecedores.csv', 'a', newline='') as arquivo_backup:
-                arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
-                for item in resultado:
-                    arquivo_backup.writerow(item)
+            elif nome == "gestacao":
+                try:
+                    cursor.execute("SELECT * FROM gestacao")
+                except Error as e:
+                    aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
+                resultado = cursor.fetchall()
+                with open('backup_gestacao.csv', 'a', newline='') as arquivo_backup:
+                    arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
+                    for item in resultado:
+                        arquivo_backup.writerow(item)
 
-        elif nome == "transacao":
-            try:
-                cursor.execute("SELECT * FROM transacao")
-            except Error as e:
-                aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
-            resultado = cursor.fetchall()
-            with open('backup_transacao.csv', 'a', newline='') as arquivo_backup:
-                arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
-                for item in resultado:
-                    arquivo_backup.writerow(item)
+            elif nome == "fornecedores":
+                try:
+                    cursor.execute("SELECT * FROM fornecedores")
+                except Error as e:
+                    aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
+                resultado = cursor.fetchall()
+                with open('backup_fornecedores.csv', 'a', newline='') as arquivo_backup:
+                    arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
+                    for item in resultado:
+                        arquivo_backup.writerow(item)
 
-    conexao.commit()
-    conexao.close()
-    aviso = messagebox.showinfo(title="Backup", message="Backup feito com sucesso!")
+            elif nome == "transacao":
+                try:
+                    cursor.execute("SELECT * FROM transacao")
+                except Error as e:
+                    aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
+                resultado = cursor.fetchall()
+                with open('backup_transacao.csv', 'a', newline='') as arquivo_backup:
+                    arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
+                    for item in resultado:
+                        arquivo_backup.writerow(item)
 
+        conexao.commit()
+        conexao.close()
+        aviso = messagebox.showinfo(title="Backup", message="Backup feito com sucesso!")
+
+
+#-----------------------------------------------------------------------------------------
+
+#funcao para restaurar o backup
+def restaurar_backup():
+    response = messagebox.askyesno(title="Backup",  message="Confirmar Restauração do Backup?")
+    if response == 1:
+        try:
+            conexao = mysql.connector.connect(
+                host = "localhost",
+                user = "root",
+                passwd = "aneis1961",
+                database = "casima"
+            )
+            #criando o cursor
+            cursor = conexao.cursor()
+        except Error as e:
+            aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel se conectar ao banco de dados \nErro: " + str(e))
+
+        sql = "INSERT INTO funcionarios (cpf, nome, telefone, endereco, salario, carteira_trabalho, cargo) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+        with open('backup_funcionarios.csv', newline='') as csvfile:
+            spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
+            for row in spamreader:
+                info = (row[0], row[1], row[2], row[3], row[4], row[5], row[6])
+                try:
+                    cursor.execute(sql, info)
+                except:
+                    sql = "UPDATE funcionarios SET nome = %s, telefone = %s, endereco = %s, salario = %s, carteira_trabalho = %s, cargo = %s WHERE cpf = %s "
+                    info2 = (str(row[1]), str(row[2]), str(row[3]), str(row[4]), str(row[5]), str(row[6]), str(row[0]))
+                    cursor.execute(sql, info2)
+        csvfile.close()
+
+        sql = "INSERT INTO animais (tag, tipo, data_nascimento, peso, sexo, mae_tag, pai_tag) VALUES (%s, %s, %s, %s, %s, %s, %s)"       
+        with open('backup_animais.csv', newline='') as csvfile:
+            spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
+            for row in spamreader:
+                info = (row[0], row[1], row[2], row[3], row[4], row[5], row[6])
+                try:
+                    cursor.execute(sql, info)
+                except:
+                    sql = "UPDATE animais SET tipo = %s, data_nascimento = %s, peso = %s, sexo = %s, mae_tag = %s, pai_tag = %s WHERE tag = %s "
+                    info2 = (str(row[1]), str(row[2]), str(row[3]), str(row[4]), str(row[5]), str(row[6]), str(row[0]))
+                    cursor.execute(sql, info2)
+        csvfile.close()
+
+        sql = "INSERT INTO vacinas (id, nome, reforco) VALUES (%s, %s, %s)"       
+        with open('backup_vacinas.csv', newline='') as csvfile:
+            spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
+            for row in spamreader:
+                info = (row[0], row[1], row[2])
+                try:
+                    cursor.execute(sql, info)
+                except:
+                    sql = "UPDATE vacinas SET nome = %s, reforco = %s WHERE id = %s "
+                    info2 = (str(row[1]), str(row[2]), str(row[0]))
+                    cursor.execute(sql, info2)
+        csvfile.close()
+
+        sql = "INSERT INTO vacinacao (id, vacina_id, animais_tag, data) VALUES (%s, %s, %s, %s)"       
+        with open('backup_vacinacao.csv', newline='') as csvfile:
+            spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
+            for row in spamreader:
+                info = (row[0], row[1], row[2], row[3])
+                try:
+                    cursor.execute(sql, info)
+                except:
+                    sql = "UPDATE vacinacao SET vacina_id = %s, animais_tag = %s, data = %s WHERE id = %s "
+                    info2 = (str(row[1]), str(row[2]), str(row[3]), str(row[0]))
+                    cursor.execute(sql, info2)
+        csvfile.close()
+
+        sql = "INSERT INTO estoque (id, item, quantidade) VALUES (%s, %s, %s)"       
+        with open('backup_estoque.csv', newline='') as csvfile:
+            spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
+            for row in spamreader:
+                info = (row[0], row[1], row[2])
+                try:
+                    cursor.execute(sql, info)
+                except:
+                    sql = "UPDATE estoque SET item = %s, quantidade = %s WHERE id = %s "
+                    info2 = (str(row[1]), str(row[2]), str(row[0]))
+                    cursor.execute(sql, info2)
+        csvfile.close()
+
+        sql = "INSERT INTO problemas_gestacao (id, nome, descricao) VALUES (%s, %s, %s)"       
+        with open('backup_problemasgest.csv', newline='') as csvfile:
+            spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
+            for row in spamreader:
+                info = (row[0], row[1], row[2])
+                try:
+                    cursor.execute(sql, info)
+                except:
+                    sql = "UPDATE problemas_gestacao SET nome = %s, descricao = %s WHERE id = %s "
+                    info2 = (str(row[1]), str(row[2]), str(row[0]))
+                    cursor.execute(sql, info2)
+        csvfile.close()
+
+        sql = "INSERT INTO gestacao (id, a_tag, pg_id, descricao, data) VALUES (%s, %s, %s, %s, %s)"
+        with open('backup_gestacao.csv', newline='') as csvfile:
+            spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
+            for row in spamreader:
+                info = (row[0], row[1], row[2], row[3], row[4])
+                try:
+                    cursor.execute(sql, info)
+                except:
+                    sql = "UPDATE gestacao SET a_tag = %s, pg_id = %s, descricao = %s, data = %s WHERE id = %s "
+                    info2 = (str(row[1]), str(row[2]), str(row[3]), str(row[4]), str(row[0]))
+                    cursor.execute(sql, info2)
+        csvfile.close()
+
+        sql = "INSERT INTO fornecedores (cnpj, nome, cidade, endereco, telefone) VALUES (%s, %s, %s, %s, %s)"
+        with open('backup_fornecedores.csv', newline='') as csvfile:
+            spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
+            for row in spamreader:
+                info = (row[0], row[1], row[2], row[3], row[4])
+                try:
+                    cursor.execute(sql, info)
+                except:
+                    sql = "UPDATE fornecedores SET nome = %s, cidade = %s, endereco = %s, telefone = %s WHERE cnpj = %s "
+                    info2 = (str(row[1]), str(row[2]), str(row[3]), str(row[4]), str(row[0]))
+                    cursor.execute(sql, info2)
+        csvfile.close()
+
+        sql = "INSERT INTO transacao (id, f_id, e_id, data, quantidade, valor_unitario,) VALUES (%s, %s, %s, %s, %s, %s)"
+        with open('backup_transacao.csv', newline='') as csvfile:
+            spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
+            for row in spamreader:
+                info = (row[0], row[1], row[2], row[3], row[4], row[5])
+                try:
+                    cursor.execute(sql, info)
+                except:
+                    sql = "UPDATE transacao SET f_id = %s, e_id = %s, data = %s, quantidade = %s, valor_unitario = %s WHERE id = %s "
+                    info2 = (str(row[1]), str(row[2]), str(row[3]), str(row[4]), str(row[5]), str(row[0]))
+                    cursor.execute(sql, info2)
+        csvfile.close()
+
+        conexao.commit()
+        conexao.close()
+        aviso = messagebox.showinfo(title="Backup", message="Restauração feita com sucesso!")
 
 #-----------------------------------------------------------------------------------------
 
