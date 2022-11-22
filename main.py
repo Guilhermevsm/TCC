@@ -483,10 +483,9 @@ def atualizar_dados(tabela):
 #-----------------------------------------------------------------------------------------
 
 #deletando item do banco
-def remover(tabela, pk, pk_entry):
+def remover(tabela, pk_entry):
     response = messagebox.askyesno(title="Deletar",  message="Confirmar Remoção?")
     if response == 1:
-        
         try:
             conexao = mysql.connector.connect(
             host = "localhost",
@@ -498,25 +497,78 @@ def remover(tabela, pk, pk_entry):
             aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel se conectar ao banco de dados \nErro: " + str(e))
         
         cursor = conexao.cursor()
+        dados = (str(pk_entry), )
         
-        sql = "DELETE FROM %s WHERE %s = %s"
-        tabela = str(tabela)
-        primary_key = str(pk)
-        primary_key_value = int(pk_entry)
-        dados = (tabela, primary_key, primary_key_value)
-        print(dados)
-        try:
-            cursor.execute(sql, dados)
-            #cursor.execute()
-            #cursor.execute("DELETE FROM animais WHERE tag=11")
-        except Error as a:
-            aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel remover o item \nErro: " + str(a))
+        if tabela == "funcionarios":
+            sql = "DELETE FROM funcionarios WHERE cpf = %s"
+            try:
+                cursor.execute(sql, dados)
+            except Error as a:
+                aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel remover o item \nErro: " + str(a))
         
+        elif tabela == "animais":
+            sql = "DELETE FROM animais WHERE tag = %s"
+            try:
+                cursor.execute(sql, dados)
+            except Error as a:
+                aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel remover o item \nErro: " + str(a))
+
+        elif tabela == "vacinas":
+            sql = "DELETE FROM vacinas WHERE id = %s"
+            try:
+                cursor.execute(sql, dados)
+            except Error as a:
+                aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel remover o item \nErro: " + str(a))
+
+        elif tabela == "vacinacao":
+            sql = "DELETE FROM vacinacao WHERE id = %s"
+            try:
+                cursor.execute(sql, dados)
+            except Error as a:
+                aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel remover o item \nErro: " + str(a))
+
+        elif tabela == "estoque":
+            sql = "DELETE FROM estoque WHERE id = %s"
+            try:
+                cursor.execute(sql, dados)
+            except Error as a:
+                aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel remover o item \nErro: " + str(a))
+
+        elif tabela == "problemas_gestacao":
+            sql = "DELETE FROM problemas_gestacao WHERE id = %s"
+            try:
+                cursor.execute(sql, dados)
+            except Error as a:
+                aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel remover o item \nErro: " + str(a))
+
+        elif tabela == "gestacao":
+            sql = "DELETE FROM gestacap WHERE id = %s"
+            try:
+                cursor.execute(sql, dados)
+            except Error as a:
+                aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel remover o item \nErro: " + str(a))
+
+        elif tabela == "fornecedores":
+            sql = "DELETE FROM fornecedores WHERE cnpj = %s"
+            try:
+                cursor.execute(sql, dados)
+            except Error as a:
+                aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel remover o item \nErro: " + str(a))
+
+        elif tabela == "transacao":
+            sql = "DELETE FROM transacao WHERE id = %s"
+            try:
+                cursor.execute(sql, dados)
+            except Error as a:
+                aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel remover o item \nErro: " + str(a))
+
+
+
         #dando commit
         conexao.commit()
-
         #fechando a conexao
         conexao.close()
+        #atualizando arvore
         my_tree.delete(*my_tree.get_children())
         query_database(tabela)
     
@@ -1134,7 +1186,7 @@ def janela_funcionarios():
     add_button = Button(button_frame, text="Adicionar", command=lambda:adicionar_ao_banco("funcionarios"))
     add_button.grid(row=0 , column=1 , padx=10, pady=10)
 
-    remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("funcionarios","cpf", str(cpf_entry.get())))
+    remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("funcionarios", cpf_entry.get()))
     remove_all_button.grid(row=0 , column=2 , padx=10, pady=10)
 
     #bind th treeview
@@ -1269,7 +1321,7 @@ def janela_animais():
     add_button = Button(button_frame, text="Adicionar", command=lambda:adicionar_ao_banco("animais"))
     add_button.grid(row=0 , column=1 , padx=10, pady=10)
 
-    remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("animais","tag", tag_entry.get()))
+    remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("animais", tag_entry.get()))
     remove_all_button.grid(row=0 , column=2 , padx=10, pady=10)
 
     #bind th treeview
@@ -1370,7 +1422,7 @@ def janela_vacinas():
     add_button = Button(button_frame, text="Adicionar", command=lambda:adicionar_ao_banco("vacinas"))
     add_button.grid(row=0 , column=1 , padx=10, pady=10)
 
-    remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("vacinas","id", id_vacina_entry.get()))
+    remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("vacinas", id_vacina_entry.get()))
     remove_all_button.grid(row=0 , column=2 , padx=10, pady=10)
 
     #bind th treeview
@@ -1479,7 +1531,7 @@ def janela_vacinacao():
     add_button = Button(button_frame, text="Adicionar", command=lambda:adicionar_ao_banco("vacinacao"))
     add_button.grid(row=0 , column=1 , padx=10, pady=10)
 
-    remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("vacinacao","id", id_vacinacao_entry.get()))
+    remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("vacinacao", id_vacinacao_entry.get()))
     remove_all_button.grid(row=0 , column=2 , padx=10, pady=10)
 
     #bind th treeview
@@ -1579,7 +1631,7 @@ def janela_estoque():
     add_button = Button(button_frame, text="Adicionar", command=lambda:adicionar_ao_banco("estoque"))
     add_button.grid(row=0 , column=1 , padx=10, pady=10)
 
-    remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("estoque","id", id_estoque_entry.get()))
+    remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("estoque", id_estoque_entry.get()))
     remove_all_button.grid(row=0 , column=2 , padx=10, pady=10)
 
     #bind th treeview
@@ -1680,7 +1732,7 @@ def janela_problemas_gestacao():
     add_button = Button(button_frame, text="Adicionar", command=lambda:adicionar_ao_banco("problemas_gestacao"))
     add_button.grid(row=0 , column=1 , padx=10, pady=10)
 
-    remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("problemas_gestacao","id", id_prob_gest_entry.get()))
+    remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("problemas_gestacao", id_prob_gest_entry.get()))
     remove_all_button.grid(row=0 , column=2 , padx=10, pady=10)
 
     #bind th treeview
@@ -1798,7 +1850,7 @@ def janela_gestacao():
     add_button = Button(button_frame, text="Adicionar", command=lambda:adicionar_ao_banco("gestacao"))
     add_button.grid(row=0 , column=1 , padx=10, pady=10)
 
-    remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("gestacao","id", id_gestacao_entry.get()))
+    remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("gestacao", id_gestacao_entry.get()))
     remove_all_button.grid(row=0 , column=2 , padx=10, pady=10)
 
     #bind th treeview
@@ -1916,7 +1968,7 @@ def janela_fornecedores():
     add_button = Button(button_frame, text="Adicionar", command=lambda:adicionar_ao_banco("fornecedores"))
     add_button.grid(row=0 , column=1 , padx=10, pady=10)
 
-    remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("fornecedores","cnpj", cnpj_fornecedor_entry.get()))
+    remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("fornecedores", cnpj_fornecedor_entry.get()))
     remove_all_button.grid(row=0 , column=2 , padx=10, pady=10)
 
     #bind th treeview
@@ -2042,7 +2094,7 @@ def janela_transacao():
     add_button = Button(button_frame, text="Adicionar", command=lambda:adicionar_ao_banco("transacao"))
     add_button.grid(row=0 , column=1 , padx=10, pady=10)
 
-    remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("transacao","id", id_transacao_entry.get()))
+    remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("transacao", id_transacao_entry.get()))
     remove_all_button.grid(row=0 , column=2 , padx=10, pady=10)
 
     #bind th treeview
