@@ -31,7 +31,7 @@ except Error as e:
 
 #-----------------------------------------------------------------------------------------
 
-def cria_menu():
+def cria_menu(): 
     #janela inicial
     global menu_principal
     global menu_banco
@@ -450,7 +450,7 @@ def atualizar_dados(tabela):
             #fechando a conexao
             conexao.close()
             my_tree.delete(*my_tree.get_children())
-            query_database("forncedores")
+            query_database("fornecedores")
 
 
         elif tabela == "transacao":
@@ -542,7 +542,7 @@ def remover(tabela, pk_entry):
                 aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel remover o item \nErro: " + str(a))
 
         elif tabela == "gestacao":
-            sql = "DELETE FROM gestacap WHERE id = %s"
+            sql = "DELETE FROM gestacao WHERE id = %s"
             try:
                 cursor.execute(sql, dados)
             except Error as a:
@@ -648,8 +648,8 @@ def adicionar_ao_banco(tabela):
             query_database("vacinacao")
 
         elif tabela == "estoque":
-            sql = "INSERT INTO estoque (id, item, quantidade) VALUES (%s, %s, %s)"
-            valores = (str(id_estoque_entry.get()), str(item_entry.get()), str(quantidade_entry.get()))
+            sql = "INSERT INTO estoque (item, quantidade) VALUES (%s, %s)"
+            valores = (str(item_entry.get()), str(quantidade_entry.get()))
 
             try:
                 cursor.execute(sql, valores)
@@ -1180,7 +1180,7 @@ def janela_funcionarios():
     button_frame = LabelFrame(root, text="Ações")
     button_frame.pack(fill="x", expand="yes", padx=20)
 
-    update_button = Button(button_frame, text="Atualizar", command=lambda:adicionar_ao_banco("funcionarios"))
+    update_button = Button(button_frame, text="Atualizar", command=lambda:atualizar_dados("funcionarios"))
     update_button.grid(row=0 , column=0 , padx=10, pady=10)
 
     add_button = Button(button_frame, text="Adicionar", command=lambda:adicionar_ao_banco("funcionarios"))
@@ -1533,6 +1533,23 @@ def janela_vacinacao():
 
     remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("vacinacao", id_vacinacao_entry.get()))
     remove_all_button.grid(row=0 , column=2 , padx=10, pady=10)
+
+    """
+    #interface para vacinar varios animais
+    btn_frame = LabelFrame(root, text="Vacinar")
+    btn_frame.pack(fill="x", expand="yes", padx=20)
+
+    label1 = Label(btn_frame, text="Quais animais você quer vacinar?")
+    label1.grid(row=0, column=0, padx=10)
+
+
+    variable = StringVar()
+    variable.set("Escolher Rebanho")
+    escolher_rebanho = OptionMenu(btn_frame, variable=variable, "bovino")
+    escolher_rebanho.current(0)
+    escolher_rebanho.grid(row=0, column=2)
+
+    """
 
     #bind th treeview
     my_tree.bind("<ButtonRelease-1>", selecionar_dados_arvore)
