@@ -59,6 +59,8 @@ def cria_menu():
 
     menu_racao = Menu(menu_principal, tearoff=0)
     menu_principal.add_cascade(label="Ração", menu=menu_racao)
+    menu_racao.add_command(label="Ingredientes", command=janela_ingredientes)
+    menu_racao.add_separator()
     menu_racao.add_command(label="Mistura Ração", command=janela_simplex)
 
     menu_backup = Menu(menu_principal, tearoff=0)
@@ -249,13 +251,23 @@ def query_database(tabela):
                 my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][2], dados[num][3]), tags=('oddrow', ))
             num += 1
 
+    elif tabela == "ingredientes":   
+        cursor.execute("SELECT * FROM ingredientes")
+        dados = cursor.fetchall()
+        #print(dados)
+        num = 0
+        for itens in dados:
+            if num % 2 == 0:
+                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][1], dados[num][2], dados[num][3], dados[num][4], dados[num][5], dados[num][6], dados[num][7], dados[num][8], dados[num][9], dados[num][10], dados[num][11], dados[num][12], dados[num][13], dados[num][14], dados[num][15], dados[num][16], dados[num][17], dados[num][18]), tags=('evenrow', ))
+            else:
+                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][1], dados[num][2], dados[num][3], dados[num][4], dados[num][5], dados[num][6], dados[num][7], dados[num][8], dados[num][9], dados[num][10], dados[num][11], dados[num][12], dados[num][13], dados[num][14], dados[num][15], dados[num][16], dados[num][17], dados[num][18]), tags=('oddrow', ))
+            num += 1
+
     #dando commit
     conexao.commit()
-
     #fechando a conexa
     conexao.close()
     
-
 #-----------------------------------------------------------------------------------------
 
 #atualizar dados existentes
@@ -291,12 +303,6 @@ def atualizar_dados(tabela):
                 cursor.execute(sql, dados)
             except Error as e:
                 aviso = messagebox.showerror(title="ERRO", message="Não foi possível salvar as alterações \nErro: " + str(e))
-            #dando commit
-            conexao.commit()
-            #fechando a conexao
-            conexao.close()
-            my_tree.delete(*my_tree.get_children())
-            query_database("animais")
         
         elif tabela == "funcionarios":
             #atualizando o banco
@@ -315,12 +321,6 @@ def atualizar_dados(tabela):
                 cursor.execute(sql, dados)
             except Error as e:
                 aviso = messagebox.showerror(title="ERRO", message="Não foi possível salvar as alterações \nErro: " + str(e))
-            #dando commit
-            conexao.commit()
-            #fechando a conexao
-            conexao.close()
-            my_tree.delete(*my_tree.get_children())
-            query_database("funcionarios")
 
         elif tabela == "vacinas":
             #atualizando o banco
@@ -335,13 +335,6 @@ def atualizar_dados(tabela):
                 cursor.execute(sql, dados)
             except Error as e:
                 aviso = messagebox.showerror(title="ERRO", message="Não foi possível salvar as alterações \nErro: " + str(e))
-            #dando commit
-            conexao.commit()
-            #fechando a conexao
-            conexao.close()
-            my_tree.delete(*my_tree.get_children())
-            query_database("vacinas")
-
 
         elif tabela == "vacinacao":
             #atualizando o banco
@@ -357,13 +350,6 @@ def atualizar_dados(tabela):
                 cursor.execute(sql, dados)
             except Error as e:
                 aviso = messagebox.showerror(title="ERRO", message="Não foi possível salvar as alterações \nErro: " + str(e))
-            #dando commit
-            conexao.commit()
-            #fechando a conexao
-            conexao.close()
-            my_tree.delete(*my_tree.get_children())
-            query_database("vacinacao")
-
 
         elif tabela == "estoque":
             #atualizando o banco
@@ -378,13 +364,6 @@ def atualizar_dados(tabela):
                 cursor.execute(sql, dados)
             except Error as e:
                 aviso = messagebox.showerror(title="ERRO", message="Não foi possível salvar as alterações \nErro: " + str(e))
-            #dando commit
-            conexao.commit()
-            #fechando a conexao
-            conexao.close()
-            my_tree.delete(*my_tree.get_children())
-            query_database("estoque")
-
 
         elif tabela == "problemas_gestacao":
             #atualizando o banco
@@ -399,13 +378,6 @@ def atualizar_dados(tabela):
                 cursor.execute(sql, dados)
             except Error as e:
                 aviso = messagebox.showerror(title="ERRO", message="Não foi possível salvar as alterações \nErro: " + str(e))
-            #dando commit
-            conexao.commit()
-            #fechando a conexao
-            conexao.close()
-            my_tree.delete(*my_tree.get_children())
-            query_database("problemas_gestacao")
-
 
         elif tabela == "gestacao":
             #atualizando o banco
@@ -422,13 +394,6 @@ def atualizar_dados(tabela):
                 cursor.execute(sql, dados)
             except Error as e:
                 aviso = messagebox.showerror(title="ERRO", message="Não foi possível salvar as alterações \nErro: " + str(e))
-            #dando commit
-            conexao.commit()
-            #fechando a conexao
-            conexao.close()
-            my_tree.delete(*my_tree.get_children())
-            query_database("gestacao")
-
         
         elif tabela == "fornecedores":
             #atualizando o banco
@@ -445,13 +410,6 @@ def atualizar_dados(tabela):
                 cursor.execute(sql, dados)
             except Error as e:
                 aviso = messagebox.showerror(title="ERRO", message="Não foi possível salvar as alterações \nErro: " + str(e))
-            #dando commit
-            conexao.commit()
-            #fechando a conexao
-            conexao.close()
-            my_tree.delete(*my_tree.get_children())
-            query_database("fornecedores")
-
 
         elif tabela == "transacao":
             #atualizando o banco
@@ -469,12 +427,22 @@ def atualizar_dados(tabela):
                 cursor.execute(sql, dados)
             except Error as e:
                 aviso = messagebox.showerror(title="ERRO", message="Não foi possível salvar as alterações \nErro: " + str(e))
-            #dando commit
-            conexao.commit()
-            #fechando a conexao
-            conexao.close()
-            my_tree.delete(*my_tree.get_children())
-            query_database("transacao")
+
+        elif tabela == "ingredientes":
+            sql = "UPDATE ingredientes SET ingrediente = %s, magnesio = %s, potassio = %s, sodio = %s, enxofre = %s, cobalto = %s, cobre = %s, iodo = %s, ferro = %s, manganes = %s, selenio = %s, zinco = %s, vitamina_a = %s, vitamina_d = %s, calcio = %s, fosforo = %s, proteina = %s, energia = %s WHERE id =  = %s"
+            valores = (str(ingrediente_entry.get()), str(magnesio_entry.get()), str(potassio_entry.get()), str(sodio_entry.get()), str(enxofre_entry.get()), str(cobalto_entry.get()), str(cobre_entry.get()), str(iodo_entry.get()), str(ferro_entry.get()), str(manganes_entry.get()), str(selenio_entry.get()), str(zinco_entry.get()), str(vitamina_a_entry.get()), str(vitamina_d_entry.get()), str(calcio_entry.get()), str(fosforo_entry.get()), str(proteina_entry.get()), str(energia_entry.get()), str(id_ingredientes_entry.get()))
+
+            try:
+                cursor.execute(sql, valores)
+            except Error as e:
+                aviso = messagebox.showerror(title="ERRO", message="Não foi possível salvar as alterações \nErro: " + str(e))
+        
+        #dando commit
+        conexao.commit()
+        #fechando a conexao
+        conexao.close()
+        my_tree.delete(*my_tree.get_children())
+        query_database(tabela)
            
     else:
         aviso = messagebox.showinfo(title="Update", message="Nada foi alterado")
@@ -562,6 +530,12 @@ def remover(tabela, pk_entry):
             except Error as a:
                 aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel remover o item \nErro: " + str(a))
 
+        elif tabela == "ingredientes":
+            sql = "DELETE FROM ingredientes WHERE id = %s"
+            try:
+                cursor.execute(sql, dados)
+            except Error as a:
+                aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel remover o item \nErro: " + str(a))
 
 
         #dando commit
@@ -600,11 +574,6 @@ def adicionar_ao_banco(tabela):
             except Error as e:
                 aviso = messagebox.showerror(title="ERRO", message="Não foi possível adicionar ao banco! \nErro: " + str(e))
 
-            conexao.commit()
-            conexao.close()
-            my_tree.delete(*my_tree.get_children())
-            query_database("funcionarios")
-
         elif tabela == "animais":
             sql = "INSERT INTO animais (tag, tipo, data_nascimento, peso, sexo, mae_tag, pai_tag) VALUES (%s, %s, %s, %s, %s, %s, %s)"
             valores = (str(tag_entry.get()), str(tipo_entry.get()), str(data_nascimento_entry.get()), str(peso_entry.get()), str(sexo_entry.get()), str(mae_tag_entry.get()), str(pai_tag_entry.get()))
@@ -614,11 +583,6 @@ def adicionar_ao_banco(tabela):
             except Error as e:
                 aviso = messagebox.showerror(title="ERRO", message="Não foi possível adicionar ao banco! \nErro: " + str(e))
 
-            conexao.commit()
-            conexao.close()
-            my_tree.delete(*my_tree.get_children())
-            query_database("animais")
-
         elif tabela == "vacinas":
             sql = "INSERT INTO vacinas (id, nome, reforco) VALUES (%s, %s, %s)"
             valores = (str(id_vacina_entry.get()), str(nome_vacina_entry.get()), str(reforco_entry.get()))
@@ -627,12 +591,7 @@ def adicionar_ao_banco(tabela):
                 cursor.execute(sql, valores)
             except Error as e:
                 aviso = messagebox.showerror(title="ERRO", message="Não foi possível adicionar ao banco! \nErro: " + str(e))
-
-            conexao.commit()
-            conexao.close()
-            my_tree.delete(*my_tree.get_children())
-            query_database("vacinas")
-
+            
         elif tabela == "vacinacao":
             sql = "INSERT INTO vacinacao (id, vacina_id, animais_tag, data) VALUES (%s, %s, %s, %s)"
             valores = (str(id_vacinacao_entry.get()), str(vacinafk_id_entry.get()), str(animaisfk_tag_entry.get()), str(data_vacinacao_entry.get()))
@@ -641,11 +600,6 @@ def adicionar_ao_banco(tabela):
                 cursor.execute(sql, valores)
             except Error as e:
                 aviso = messagebox.showerror(title="ERRO", message="Não foi possível adicionar ao banco! \nErro: " + str(e))
-
-            conexao.commit()
-            conexao.close()
-            my_tree.delete(*my_tree.get_children())
-            query_database("vacinacao")
 
         elif tabela == "estoque":
             sql = "INSERT INTO estoque (item, quantidade) VALUES (%s, %s)"
@@ -656,11 +610,6 @@ def adicionar_ao_banco(tabela):
             except Error as e:
                 aviso = messagebox.showerror(title="ERRO", message="Não foi possível adicionar ao banco! \nErro: " + str(e))
 
-            conexao.commit()
-            conexao.close()
-            my_tree.delete(*my_tree.get_children())
-            query_database("estoque")
-
         elif tabela == "problemas_gestacao":
             sql = "INSERT INTO problemas_gestacao (id, nome, descricao) VALUES (%s, %s, %s)"
             valores = (str(id_prob_gest_entry.get()), str(nome_prob_gest_entry.get()), str(descricao_prob_gest_entry.get()))
@@ -669,11 +618,6 @@ def adicionar_ao_banco(tabela):
                 cursor.execute(sql, valores)
             except Error as e:
                 aviso = messagebox.showerror(title="ERRO", message="Não foi possível adicionar ao banco! \nErro: " + str(e))
-
-            conexao.commit()
-            conexao.close()
-            my_tree.delete(*my_tree.get_children())
-            query_database("problemas_gestacao")
 
         elif tabela == "gestacao":
             sql = "INSERT INTO gestacao (id, a_tag, pg_id, descricao, data) VALUES (%s, %s, %s, %s, %s)"
@@ -684,11 +628,6 @@ def adicionar_ao_banco(tabela):
             except Error as e:
                 aviso = messagebox.showerror(title="ERRO", message="Não foi possível adicionar ao banco! \nErro: " + str(e))
 
-            conexao.commit()
-            conexao.close()
-            my_tree.delete(*my_tree.get_children())
-            query_database("gestacao")
-
         elif tabela == "fornecedores":
             sql = "INSERT INTO fornecedores (cnpj, nome, cidade, endereco, telefone) VALUES (%s, %s, %s, %s, %s)"
             valores = (str(cnpj_fornecedor_entry.get()), str(nome_fornecedor_entry.get()), str(cidade_fornecedor_entry.get()), str(endereco_fornecedor_entry.get()), str(telefone_fornecedor_entry.get()))
@@ -696,13 +635,7 @@ def adicionar_ao_banco(tabela):
             try:
                 cursor.execute(sql, valores)
             except Error as e:
-                aviso = messagebox.showerror(title="ERRO", message="Não foi possível adicionar ao banco! \nErro: " + str(e))
-
-            conexao.commit()
-            conexao.close()
-            my_tree.delete(*my_tree.get_children())
-            query_database("fornecedores")
-            
+                aviso = messagebox.showerror(title="ERRO", message="Não foi possível adicionar ao banco! \nErro: " + str(e))        
 
         elif tabela == "transacao":
             sql = "INSERT INTO transacao (id, f_id, e_id, data, quantidade, valor_unitario) VALUES (%s, %s, %s, %s, %s, %s)"
@@ -713,12 +646,20 @@ def adicionar_ao_banco(tabela):
             except Error as e:
                 aviso = messagebox.showerror(title="ERRO", message="Não foi possível adicionar ao banco! \nErro: " + str(e))
 
-            my_tree.delete(*my_tree.get_children())
-            conexao.commit()
-            conexao.close()
-            query_database("transacao")
+        elif tabela == "ingredientes":
+            sql = "INSERT INTO ingredientes (id, ingrediente, magnesio, potassio, sodio, enxofre, cobalto, cobre, iodo, ferro, manganes, selenio, zinco, vitamina_a, vitamina_d, calcio, fosforo, proteina, energia) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+            valores = (str(id_ingredientes_entry.get()), str(ingrediente_entry.get()), str(magnesio_entry.get()), str(potassio_entry.get()), str(sodio_entry.get()), str(enxofre_entry.get()), str(cobalto_entry.get()), str(cobre_entry.get()), str(iodo_entry.get()), str(ferro_entry.get()), str(manganes_entry.get()), str(selenio_entry.get()), str(zinco_entry.get()), str(vitamina_a_entry.get()), str(vitamina_d_entry.get()), str(calcio_entry.get()), str(fosforo_entry.get()), str(proteina_entry.get()), str(energia_entry.get()))
 
+            try:
+                cursor.execute(sql, valores)
+            except Error as e:
+                aviso = messagebox.showerror(title="ERRO", message="Não foi possível adicionar ao banco! \nErro: " + str(e))
 
+        conexao.commit()
+        conexao.close()
+        
+        my_tree.delete(*my_tree.get_children())
+        query_database(tabela)
 
 #-----------------------------------------------------------------------------------------
 
@@ -2307,6 +2248,252 @@ def janela_filhos():
     
     frame2_parentes = LabelFrame(root, text="Resultado")
     frame2_parentes.pack(pady=10, padx=10, fill="x", expand="yes")
+
+#-----------------------------------------------------------------------------------------
+#janela para mostrar tabela com os ingredientes da racao e seus valores nutricionais
+
+def janela_ingredientes():
+    for widgets in root.winfo_children():
+        widgets.destroy()
+    cria_menu()
+    def selecionar_dados_arvore(e):
+        id_ingredientes_entry.delete(0, END)
+        ingrediente_entry.delete(0, END)
+        magnesio_entry.delete(0, END)
+        potassio_entry.delete(0, END)
+        sodio_entry.delete(0, END)
+        enxofre_entry.delete(0, END)
+        cobalto_entry.delete(0, END)
+        cobre_entry.delete(0, END)
+        iodo_entry.delete(0, END)
+        ferro_entry.delete(0, END)
+        manganes_entry.delete(0, END) 
+        selenio_entry.delete(0, END) 
+        zinco_entry.delete(0, END) 
+        vitamina_a_entry.delete(0, END)
+        vitamina_d_entry.delete(0, END)
+        calcio_entry.delete(0, END) 
+        fosforo_entry.delete(0, END)
+        proteina_entry.delete(0, END)
+        energia_entry.delete(0, END)
+
+        selecionado = my_tree.focus()
+
+        valor = my_tree.item(selecionado, 'values')
+
+        id_ingredientes_entry.insert(0, valor[0])
+        ingrediente_entry.insert(0, valor[1])
+        magnesio_entry.insert(0, valor[2])
+        potassio_entry.insert(0, valor[3])
+        sodio_entry.insert(0, valor[4])
+        enxofre_entry.insert(0, valor[5])
+        cobalto_entry.insert(0, valor[6])
+        cobre_entry.insert(0, valor[7])
+        iodo_entry.insert(0, valor[8])
+        ferro_entry.insert(0, valor[9])
+        manganes_entry.insert(0, valor[10])
+        selenio_entry.insert(0, valor[11])
+        zinco_entry.insert(0, valor[12])
+        vitamina_a_entry.insert(0, valor[13])
+        vitamina_d_entry.insert(0, valor[14])
+        calcio_entry.insert(0, valor[15])
+        fosforo_entry.insert(0, valor[16])
+        proteina_entry.insert(0, valor[17])
+        energia_entry.insert(0, valor[18])
+
+
+    root.geometry("1600x800")
+    
+    #adicionando estilo
+    style = ttk.Style()
+    style.theme_use('default')
+    style.configure("Treeview", background="#D3D3D3", foreground="black", rowheight=25, fieldbackground="#D3D3D3")
+    style.map('Treeview', background=[('selected', "#347083")])
+
+    global my_tree
+
+    #criando frame da treeview
+    frame_ingredients = Frame(root)
+    frame_ingredients.pack(pady=10)
+
+    #criando o scroll da treeview
+    tree_scroll = Scrollbar(frame_ingredients)
+    tree_scroll.pack(side=RIGHT, fill=Y)
+
+    #criando a treeview
+    my_tree = ttk.Treeview(frame_ingredients, yscrollcommand=tree_scroll.set, selectmode="extended")
+    my_tree.pack()
+
+    #configurando o scroll
+    tree_scroll.config(command=my_tree.yview)
+
+    #difinindo as colunas
+    my_tree['columns'] = ("ID", "Ingrediente", "Magnésio", "Potássio", "Sódio", "Enxofre", "Cobalto", "Cobre", "Iodo", "Ferro", "Manganês", "Selênio", "Zinco", "Vitamina A", "Vitamina D", "Cálcio", "Fósforo", "Proteina", "Energia")
+    my_tree.column("#0", width=0, stretch=NO)
+    my_tree.column("ID", width=50, anchor=W)
+    my_tree.column("Ingrediente", width=140, anchor=W)
+    my_tree.column("Magnésio", width=80, anchor=CENTER)
+    my_tree.column("Potássio", width=80, anchor=CENTER)
+    my_tree.column("Sódio", width=80, anchor=CENTER)
+    my_tree.column("Enxofre", width=80, anchor=CENTER)
+    my_tree.column("Cobalto", width=80, anchor=CENTER)
+    my_tree.column("Cobre", width=80, anchor=CENTER)
+    my_tree.column("Iodo", width=80, anchor=CENTER)
+    my_tree.column("Ferro", width=80, anchor=CENTER)
+    my_tree.column("Manganês", width=80, anchor=CENTER)
+    my_tree.column("Selênio", width=80, anchor=CENTER)
+    my_tree.column("Zinco", width=80, anchor=CENTER)
+    my_tree.column("Vitamina A", width=80, anchor=CENTER)
+    my_tree.column("Vitamina D", width=80, anchor=CENTER)
+    my_tree.column("Cálcio", width=80, anchor=CENTER)
+    my_tree.column("Fósforo", width=80, anchor=CENTER)
+    my_tree.column("Proteina", width=80, anchor=CENTER)
+    my_tree.column("Energia", width=80, anchor=CENTER)
+
+    #criando as headings
+    my_tree.heading("#0", text="", anchor=W)
+    my_tree.heading("ID", text="ID", anchor=W)
+    my_tree.heading("Ingrediente", text="Ingrediente", anchor=W)
+    my_tree.heading("Magnésio", text="Magnésio", anchor=CENTER)
+    my_tree.heading("Potássio", text="Potássio", anchor=CENTER)
+    my_tree.heading("Sódio", text="Sódio", anchor=CENTER)
+    my_tree.heading("Enxofre", text="Enxofre", anchor=CENTER)
+    my_tree.heading("Cobalto", text="Cobalto", anchor=CENTER)
+    my_tree.heading("Cobre", text="Cobre", anchor=CENTER)
+    my_tree.heading("Iodo", text="Iodo", anchor=CENTER)
+    my_tree.heading("Ferro", text="Ferro", anchor=CENTER)
+    my_tree.heading("Manganês", text="Manganês", anchor=CENTER)
+    my_tree.heading("Selênio", text="Selênio", anchor=CENTER)
+    my_tree.heading("Zinco", text="Zinco", anchor=CENTER)
+    my_tree.heading("Vitamina A", text="Vitamina A", anchor=CENTER)
+    my_tree.heading("Vitamina D", text="Vitamina D", anchor=CENTER)
+    my_tree.heading("Cálcio", text="Cálcio", anchor=CENTER)
+    my_tree.heading("Fósforo", text="Fósfore", anchor=CENTER)
+    my_tree.heading("Proteina", text="Proteina", anchor=CENTER)
+    my_tree.heading("Energia", text="Energia", anchor=CENTER)
+
+    #alternando as cores das linhas
+    my_tree.tag_configure('oddrow', background="white")
+    my_tree.tag_configure('evenrow', background="lightblue")
+
+    #adicionando as caixas de entrada
+    data_frame = LabelFrame(root, text="Ingredientes")
+    data_frame.pack(fill="x", expand="yes", padx=20)
+    global id_ingredientes_entry
+    id_ingredientes_label = Label(data_frame, text="ID")
+    id_ingredientes_label.grid(row=0, column=0, padx=10, pady=10)
+    id_ingredientes_entry = Entry(data_frame)
+    id_ingredientes_entry.grid(row=0, column=1, padx=10, pady=10)
+    global ingrediente_entry
+    ingrediente_label = Label(data_frame, text="Ingrediente")
+    ingrediente_label.grid(row=0, column=2, padx=10, pady=10)
+    ingrediente_entry = Entry(data_frame)
+    ingrediente_entry.grid(row=0, column=3, padx=10, pady=10)
+    global magnesio_entry
+    magnesio_label = Label(data_frame, text="Magnésio")
+    magnesio_label.grid(row=0, column=4, padx=10, pady=10)
+    magnesio_entry = Entry(data_frame)
+    magnesio_entry.grid(row=0, column=5, padx=10, pady=10)
+    global potassio_entry
+    potassio_label = Label(data_frame, text="Potássio")
+    potassio_label.grid(row=1, column=0, padx=10, pady=10)
+    potassio_entry = Entry(data_frame)
+    potassio_entry.grid(row=1, column=1, padx=10, pady=10)
+    global sodio_entry
+    sodio_label = Label(data_frame, text="Sódio")
+    sodio_label.grid(row=1, column=2, padx=10, pady=10)
+    sodio_entry = Entry(data_frame)
+    sodio_entry.grid(row=1, column=3, padx=10, pady=10)
+    global enxofre_entry
+    enxofre_label = Label(data_frame, text="Enxofre")
+    enxofre_label.grid(row=1, column=4, padx=10, pady=10)
+    enxofre_entry = Entry(data_frame)
+    enxofre_entry.grid(row=1, column=5, padx=10, pady=10)
+    global cobalto_entry
+    cobalto_label = Label(data_frame, text="Cobalto")
+    cobalto_label.grid(row=1, column=6, padx=10, pady=10)
+    cobalto_entry = Entry(data_frame)
+    cobalto_entry.grid(row=1, column=7, padx=10, pady=10)
+    global cobre_entry
+    cobre_label = Label(data_frame, text="Cobre")
+    cobre_label.grid(row=2, column=0, padx=10, pady=10)
+    cobre_entry = Entry(data_frame)
+    cobre_entry.grid(row=2, column=1, padx=10, pady=10)
+    global iodo_entry
+    iodo_label = Label(data_frame, text="Iodo")
+    iodo_label.grid(row=2, column=2, padx=10, pady=10)
+    iodo_entry = Entry(data_frame)
+    iodo_entry.grid(row=2, column=3, padx=10, pady=10)
+    global ferro_entry
+    ferro_label = Label(data_frame, text="Ferro")
+    ferro_label.grid(row=2, column=4, padx=10, pady=10)
+    ferro_entry = Entry(data_frame)
+    ferro_entry.grid(row=2, column=5, padx=10, pady=10)
+    global manganes_entry
+    manganes_label = Label(data_frame, text="Manganês")
+    manganes_label.grid(row=2, column=6, padx=10, pady=10)
+    manganes_entry = Entry(data_frame)
+    manganes_entry.grid(row=2, column=7, padx=10, pady=10)
+    global selenio_entry
+    selenio_label = Label(data_frame, text="Selênio")
+    selenio_label.grid(row=2, column=8, padx=10, pady=10)
+    selenio_entry = Entry(data_frame)
+    selenio_entry.grid(row=2, column=9, padx=10, pady=10)
+    global zinco_entry
+    zinco_label = Label(data_frame, text="Zinco")
+    zinco_label.grid(row=3, column=0, padx=10, pady=10)
+    zinco_entry = Entry(data_frame)
+    zinco_entry.grid(row=3, column=1, padx=10, pady=10)
+    global vitamina_a_entry
+    vitamina_a_label = Label(data_frame, text="Vitamina A")
+    vitamina_a_label.grid(row=3, column=2, padx=10, pady=10)
+    vitamina_a_entry = Entry(data_frame)
+    vitamina_a_entry.grid(row=3, column=3, padx=10, pady=10)
+    global vitamina_d_entry
+    vitamina_d_label = Label(data_frame, text="Vitamina A")
+    vitamina_d_label.grid(row=3, column=4, padx=10, pady=10)
+    vitamina_d_entry = Entry(data_frame)
+    vitamina_d_entry.grid(row=3, column=5, padx=10, pady=10)
+    global calcio_entry
+    calcio_laabel = Label(data_frame, text="Cálcio")
+    calcio_laabel.grid(row=3, column=6, padx=10, pady=10)
+    calcio_entry = Entry(data_frame)
+    calcio_entry.grid(row=3, column=7, padx=10, pady=10)
+    global fosforo_entry
+    fosforo_label = Label(data_frame, text="Fósforo")
+    fosforo_label.grid(row=3, column=8, padx=10, pady=10)
+    fosforo_entry = Entry(data_frame)
+    fosforo_entry.grid(row=3, column=9, padx=10, pady=10)
+    global proteina_entry
+    proteina_label = Label(data_frame, text="Proteina")
+    proteina_label.grid(row=4, column=0, padx=10, pady=10)
+    proteina_entry = Entry(data_frame)
+    proteina_entry.grid(row=4, column=1, padx=10, pady=10)
+    global energia_entry
+    energia_label = Label(data_frame, text="Energia")
+    energia_label.grid(row=4, column=2, padx=10, pady=10)
+    energia_entry = Entry(data_frame)
+    energia_entry.grid(row=4, column=3, padx=10, pady=10)
+
+
+    query_database("ingredientes")
+
+    #adicionando botões
+    button_frame = LabelFrame(root, text="Ações")
+    button_frame.pack(fill="x", expand="yes", padx=20)
+
+    update_button = Button(button_frame, text="Atualizar", command=lambda:atualizar_dados("ingredientes"))
+    update_button.grid(row=0 , column=0 , padx=10, pady=10)
+
+    add_button = Button(button_frame, text="Adicionar", command=lambda:adicionar_ao_banco("ingredientes"))
+    add_button.grid(row=0 , column=1 , padx=10, pady=10)
+
+    remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("ingredientes", id_ingredientes_entry.get()))
+    remove_all_button.grid(row=0 , column=2 , padx=10, pady=10)
+
+    #bind th treeview
+    my_tree.bind("<ButtonRelease-1>", selecionar_dados_arvore) 
+
 
 #-----------------------------------------------------------------------------------------
 

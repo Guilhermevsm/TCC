@@ -86,3 +86,28 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS transacao (
 VIEWS
 
 cursor.execute("CREATE VIEW vacinados AS SELECT animais.tag, vacinacao.vacina_id, vacinas.nome, vacinacao.data FROM animais, vacinacao, vacinas WHERE animais.tag = vacinacao.animais_tag AND vacinacao.vacina_id = vacinas.id")
+
+-----------------------------------------------------------------------------
+#parte do banco para a ração
+
+cursor.execute("""CREATE TABLE IF NOT EXISTS ingredientes (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        ingrediente VARCHAR(255),
+        magnesio DECIMAL(10,2),
+        potassio DECIMAL(10,2),
+        sodio DECIMAL(10,2),
+        enxofre DECIMAL(10,2),
+        cobalto DECIMAL(10,2),
+        cobre DECIMAL(10,2),
+        iodo DECIMAL(10,2),
+        ferro DECIMAL(10,2),
+        manganes DECIMAL(10,2),
+        selenio DECIMAL(10,2),
+        zinco DECIMAL(10,2),
+        vitamina_a DECIMAL(10,2),
+        vitamina_d DECIMAL(10,2),
+        calcio DECIMAL(10,2),
+        fosforo DECIMAL(10,2),
+        proteina DECIMAL(10,2),
+        energia DECIMAL(10,2),
+        )""")

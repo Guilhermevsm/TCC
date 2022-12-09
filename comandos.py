@@ -12,21 +12,33 @@ try:
     )
     #criando o cursor
     cursor = conexao.cursor()
+    print("Cursor criado")
 except Error as e:
-    print("Erro")
+    print(e)
 
-sql = "INSERT INTO funcionarios (cpf, nome, telefone, endereco, salario, carteira_trabalho, cargo) VALUES (%s, %s, %s, %s, %s, %s, %s)"
-with open('backup_funcionarios.csv', newline='') as csvfile:
-    spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
-    for row in spamreader:
-        info = (row[0], row[1], row[2], row[3], row[4], row[5], row[6])
-        try:
-            cursor.execute(sql, info)
-        except:
-            sql = "UPDATE funcionarios SET nome = %s, telefone = %s, endereco = %s, salario = %s, carteira_trabalho = %s, cargo = %s WHERE cpf = %s "
-            info2 = (str(row[1]), str(row[2]), str(row[3]), str(row[4]), str(row[5]), str(row[6]), str(row[0]))
-            cursor.execute(sql, info2)
-csvfile.close()
+cursor.execute("""CREATE TABLE IF NOT EXISTS ingredientes (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        ingrediente VARCHAR(255),
+        magnesio DECIMAL(10,2),
+        potassio DECIMAL(10,2),
+        sodio DECIMAL(10,2),
+        enxofre DECIMAL(10,2),
+        cobalto DECIMAL(10,2),
+        cobre DECIMAL(10,2),
+        iodo DECIMAL(10,2),
+        ferro DECIMAL(10,2),
+        manganes DECIMAL(10,2),
+        selenio DECIMAL(10,2),
+        zinco DECIMAL(10,2),
+        vitamina_a DECIMAL(10,2),
+        vitamina_d DECIMAL(10,2),
+        calcio DECIMAL(10,2),
+        fosforo DECIMAL(10,2),
+        proteina DECIMAL(10,2),
+        energia DECIMAL(10,2)
+        )""")
 
 conexao.commit()
 conexao.close()
+
+print("SUCESSO")
