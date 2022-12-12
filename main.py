@@ -59,9 +59,9 @@ def cria_menu():
 
     menu_racao = Menu(menu_principal, tearoff=0)
     menu_principal.add_cascade(label="Ração", menu=menu_racao)
-    menu_racao.add_command(label="Ingredientes", command=janela_ingredientes)
-    menu_racao.add_separator()
     menu_racao.add_command(label="Mistura Ração", command=janela_simplex)
+    menu_racao.add_separator()
+    menu_racao.add_command(label="Ingredientes", command=janela_ingredientes)
 
     menu_backup = Menu(menu_principal, tearoff=0)
     menu_principal.add_cascade(label="Backup", menu=menu_backup)
@@ -665,135 +665,139 @@ def adicionar_ao_banco(tabela):
 
 #funcao para fazer um backup do banco em varios arquivos csv
 def fazer_backup():
-    try:
-        os.remove("backup_animais.csv")
-        os.remove("backup_estoque.csv")
-        os.remove("backup_fornecedores.csv")
-        os.remove("backup_funcionarios.csv")
-        os.remove("backup_gestacao.csv")
-        os.remove("backup_problemasgest.csv")
-        os.remove("backup_transacao.csv")
-        os.remove("backup_vacinacao.csv")
-        os.remove("backup_vacinas.csv")
-    
-    finally:
+    response = messagebox.askyesno(title="Backup",  message="Fazer Backup? Isso apagará o backup antigo")
+    if response == 1:
         try:
-            conexao = mysql.connector.connect(
-                host = "localhost",
-                user = "root",
-                passwd = "aneis1961",
-                database = "casima"
-            )
-            #criando o cursor
-            cursor = conexao.cursor()
-        except Error as e:
-            aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel se conectar ao banco de dados \nErro: " + str(e))
-
-        tabelas = ["animais", "funcionarios", "vacinas", "vacinacao", "estoque", "problemas_gestacao", "gestacao", "fornecedores", "transacao"]
+            os.remove("backup_animais.csv")
+            os.remove("backup_estoque.csv")
+            os.remove("backup_fornecedores.csv")
+            os.remove("backup_funcionarios.csv")
+            os.remove("backup_gestacao.csv")
+            os.remove("backup_problemasgest.csv")
+            os.remove("backup_transacao.csv")
+            os.remove("backup_vacinacao.csv")
+            os.remove("backup_vacinas.csv")
         
-        for nome in tabelas:
-            if nome == "animais":
-                try:
-                    cursor.execute("SELECT * FROM animais")
-                except Error as e:
-                    aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
-                resultado = cursor.fetchall()
-                with open('backup_animais.csv', 'a', newline='') as arquivo_backup:
-                    arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
-                    for item in resultado:
-                        arquivo_backup.writerow(item)
+        finally:
+            try:
+                conexao = mysql.connector.connect(
+                    host = "localhost",
+                    user = "root",
+                    passwd = "aneis1961",
+                    database = "casima"
+                )
+                #criando o cursor
+                cursor = conexao.cursor()
+            except Error as e:
+                aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel se conectar ao banco de dados \nErro: " + str(e))
 
-            elif nome == "funcionarios":
-                try:
-                    cursor.execute("SELECT * FROM funcionarios")
-                except Error as e:
-                    aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
-                resultado = cursor.fetchall()
-                with open('backup_funcionarios.csv', 'a', newline='') as arquivo_backup:
-                    arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
-                    for item in resultado:
-                        arquivo_backup.writerow(item)
+            tabelas = ["animais", "funcionarios", "vacinas", "vacinacao", "estoque", "problemas_gestacao", "gestacao", "fornecedores", "transacao"]
+            
+            for nome in tabelas:
+                if nome == "animais":
+                    try:
+                        cursor.execute("SELECT * FROM animais")
+                    except Error as e:
+                        aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
+                    resultado = cursor.fetchall()
+                    with open('backup_animais.csv', 'a', newline='') as arquivo_backup:
+                        arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
+                        for item in resultado:
+                            arquivo_backup.writerow(item)
 
-            elif nome == "vacinas":
-                try:
-                    cursor.execute("SELECT * FROM vacinas")
-                except Error as e:
-                    aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
-                resultado = cursor.fetchall()
-                with open('backup_vacinas.csv', 'a', newline='') as arquivo_backup:
-                    arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
-                    for item in resultado:
-                        arquivo_backup.writerow(item)
+                elif nome == "funcionarios":
+                    try:
+                        cursor.execute("SELECT * FROM funcionarios")
+                    except Error as e:
+                        aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
+                    resultado = cursor.fetchall()
+                    with open('backup_funcionarios.csv', 'a', newline='') as arquivo_backup:
+                        arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
+                        for item in resultado:
+                            arquivo_backup.writerow(item)
 
-            elif nome == "vacinacao":
-                try:
-                    cursor.execute("SELECT * FROM vacinacao")
-                except Error as e:
-                    aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
-                resultado = cursor.fetchall()
-                with open('backup_vacinacao.csv', 'a', newline='') as arquivo_backup:
-                    arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
-                    for item in resultado:
-                        arquivo_backup.writerow(item)
+                elif nome == "vacinas":
+                    try:
+                        cursor.execute("SELECT * FROM vacinas")
+                    except Error as e:
+                        aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
+                    resultado = cursor.fetchall()
+                    with open('backup_vacinas.csv', 'a', newline='') as arquivo_backup:
+                        arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
+                        for item in resultado:
+                            arquivo_backup.writerow(item)
 
-            elif nome == "estoque":
-                try:
-                    cursor.execute("SELECT * FROM estoque")
-                except Error as e:
-                    aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
-                resultado = cursor.fetchall()
-                with open('backup_estoque.csv', 'a', newline='') as arquivo_backup:
-                    arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
-                    for item in resultado:
-                        arquivo_backup.writerow(item)
+                elif nome == "vacinacao":
+                    try:
+                        cursor.execute("SELECT * FROM vacinacao")
+                    except Error as e:
+                        aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
+                    resultado = cursor.fetchall()
+                    with open('backup_vacinacao.csv', 'a', newline='') as arquivo_backup:
+                        arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
+                        for item in resultado:
+                            arquivo_backup.writerow(item)
 
-            elif nome == "problemas_gestacao":
-                try:
-                    cursor.execute("SELECT * FROM problemas_gestacao")
-                except Error as e:
-                    aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
-                resultado = cursor.fetchall()
-                with open('backup_problemasgest.csv', 'a', newline='') as arquivo_backup:
-                    arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
-                    for item in resultado:
-                        arquivo_backup.writerow(item)
+                elif nome == "estoque":
+                    try:
+                        cursor.execute("SELECT * FROM estoque")
+                    except Error as e:
+                        aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
+                    resultado = cursor.fetchall()
+                    with open('backup_estoque.csv', 'a', newline='') as arquivo_backup:
+                        arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
+                        for item in resultado:
+                            arquivo_backup.writerow(item)
 
-            elif nome == "gestacao":
-                try:
-                    cursor.execute("SELECT * FROM gestacao")
-                except Error as e:
-                    aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
-                resultado = cursor.fetchall()
-                with open('backup_gestacao.csv', 'a', newline='') as arquivo_backup:
-                    arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
-                    for item in resultado:
-                        arquivo_backup.writerow(item)
+                elif nome == "problemas_gestacao":
+                    try:
+                        cursor.execute("SELECT * FROM problemas_gestacao")
+                    except Error as e:
+                        aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
+                    resultado = cursor.fetchall()
+                    with open('backup_problemasgest.csv', 'a', newline='') as arquivo_backup:
+                        arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
+                        for item in resultado:
+                            arquivo_backup.writerow(item)
 
-            elif nome == "fornecedores":
-                try:
-                    cursor.execute("SELECT * FROM fornecedores")
-                except Error as e:
-                    aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
-                resultado = cursor.fetchall()
-                with open('backup_fornecedores.csv', 'a', newline='') as arquivo_backup:
-                    arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
-                    for item in resultado:
-                        arquivo_backup.writerow(item)
+                elif nome == "gestacao":
+                    try:
+                        cursor.execute("SELECT * FROM gestacao")
+                    except Error as e:
+                        aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
+                    resultado = cursor.fetchall()
+                    with open('backup_gestacao.csv', 'a', newline='') as arquivo_backup:
+                        arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
+                        for item in resultado:
+                            arquivo_backup.writerow(item)
 
-            elif nome == "transacao":
-                try:
-                    cursor.execute("SELECT * FROM transacao")
-                except Error as e:
-                    aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
-                resultado = cursor.fetchall()
-                with open('backup_transacao.csv', 'a', newline='') as arquivo_backup:
-                    arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
-                    for item in resultado:
-                        arquivo_backup.writerow(item)
+                elif nome == "fornecedores":
+                    try:
+                        cursor.execute("SELECT * FROM fornecedores")
+                    except Error as e:
+                        aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
+                    resultado = cursor.fetchall()
+                    with open('backup_fornecedores.csv', 'a', newline='') as arquivo_backup:
+                        arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
+                        for item in resultado:
+                            arquivo_backup.writerow(item)
 
-        conexao.commit()
-        conexao.close()
-        aviso = messagebox.showinfo(title="Backup", message="Backup feito com sucesso!")
+                elif nome == "transacao":
+                    try:
+                        cursor.execute("SELECT * FROM transacao")
+                    except Error as e:
+                        aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel fazer o backup \nErro: " + str(e))
+                    resultado = cursor.fetchall()
+                    with open('backup_transacao.csv', 'a', newline='') as arquivo_backup:
+                        arquivo_backup = csv.writer(arquivo_backup, dialect='excel')
+                        for item in resultado:
+                            arquivo_backup.writerow(item)
+
+            conexao.commit()
+            conexao.close()
+            aviso = messagebox.showinfo(title="Backup", message="Backup feito com sucesso!")
+    else:
+        aviso = messagebox.showinfo(title="Backup", message="Backup não realizado!")
 
 
 #-----------------------------------------------------------------------------------------
@@ -942,7 +946,7 @@ def janela_simplex():
     for widgets in root.winfo_children():
         widgets.destroy()
     cria_menu()
-    root.geometry("500x300")
+    root.geometry("800x600")
 
     #função simplex
     def simplex():
@@ -968,35 +972,105 @@ def janela_simplex():
         # x: array são os valores de x que otimizão a função
         #nit é o numero de interções
 
-        resposta_label = Label(frame_simplex, text="Quantidade de ingrediente 1 = " + str(resultado['x'][0]) + " Kg\nQuantidade de ingrediente 2 = " + str(resultado['x'][1]) + " Kg\nQuantidade de ingrediente 3 = " + str(resultado['x'][2]) + " Kg")
-        resposta_label.grid(row=3, column=0, columnspan=4, rowspan=3)
+        resposta_label = Label(frame_final, text="Quantidade de ingrediente 1 = " + str(resultado['x'][0]) + " Kg\nQuantidade de ingrediente 2 = " + str(resultado['x'][1]) + " Kg\nQuantidade de ingrediente 3 = " + str(resultado['x'][2]) + " Kg")
+        resposta_label.grid(row=1, column=1, columnspan=4, rowspan=3)
 
+
+
+    def desabilitar_botao(ingrediente):
+        if ingrediente == "soja" and ing1.get() == 1:
+            ingrediente1_entry.config(state=NORMAL)
+        elif ingrediente == "soja" and ing1.get() == 0:
+            ingrediente1_entry.delete(0, END)
+            #ingrediente1_entry.insert(0, "0")
+            ingrediente1_entry.config(state=DISABLED)           
+
+        if ingrediente == "milho" and ing2.get() == 1:
+            ingrediente2_entry.config(state=NORMAL)
+        elif ingrediente == "milho" and ing2.get() == 0:
+            ingrediente2_entry.delete(0, END)
+            #ingrediente2_entry.insert(0, "0")
+            ingrediente2_entry.config(state=DISABLED)
+            
+        if ingrediente == "cana" and ing3.get() == 1:
+            ingrediente3_entry.config(state=NORMAL)
+        elif ingrediente == "cana" and ing3.get() == 0:
+            ingrediente3_entry.delete(0, END)
+            #ingrediente3_entry.insert(0, "0")
+            ingrediente3_entry.config(state=DISABLED)
+        
+        if ingrediente == "algodao" and ing4.get() == 1:
+            ingrediente4_entry.config(state=NORMAL)
+        elif ingrediente == "algodao" and ing4.get() == 0:
+            ingrediente4_entry.delete(0, END)
+            #ingrediente4_entry.insert(0, "0")
+            ingrediente4_entry.config(state=DISABLED)
+            
+        if ingrediente == "sal" and ing5.get() == 1:
+            ingrediente5_entry.config(state=NORMAL)
+        elif ingrediente == "sal" and ing5.get() == 0:
+            ingrediente5_entry.delete(0, END)
+            #ingrediente5_entry.insert(0, "0")
+            ingrediente5_entry.config(state=DISABLED)
+            
+    #criando frame para selecionar especificaacoes
+    frame_selecionar = LabelFrame(root, text="Selecionar ingredientes disponíveis")
+    frame_selecionar.pack(fill="x", padx=10, pady=10)
+
+    ing1 = IntVar()
+    ing2 = IntVar()
+    ing3 = IntVar()
+    ing4 = IntVar()
+    ing5 = IntVar()
+    
+    soja = Checkbutton(frame_selecionar, text="Soja", variable=ing1, command=lambda:desabilitar_botao("soja"))
+    milho = Checkbutton(frame_selecionar, text="Milho", variable=ing2, command=lambda:desabilitar_botao("milho"))
+    cana = Checkbutton(frame_selecionar, text="Cana", variable=ing3, command=lambda:desabilitar_botao("cana"))
+    algodao = Checkbutton(frame_selecionar, text="Algodão", variable=ing4, command=lambda:desabilitar_botao("algodao"))
+    sal_mineral = Checkbutton(frame_selecionar, text="Sal mineral", variable=ing5, command=lambda:desabilitar_botao("sal"))
+
+    soja.grid(row=0, column=0, padx=4, pady=4)
+    milho.grid(row=0, column=1, padx=4, pady=4)
+    cana.grid(row=0, column=2, padx=4, pady=4)
+    algodao.grid(row=0, column=3, padx=4, pady=4)
+    sal_mineral.grid(row=0, column=4, padx=4, pady=4)
+    
     #criando frame do simplex
-    frame_simplex = Frame(root)
-    frame_simplex.pack(pady=10)
+    frame_simplex = LabelFrame(root, text="Quantidade disponível de cada ingrediente em Kg")
+    frame_simplex.pack(fill="x", pady=10, padx=10)
 
-    ingrediente1_label = Label(frame_simplex, text="Ingrediente 1")
+    ingrediente1_label = Label(frame_simplex, text="Soja")
     ingrediente1_label.grid(row=0, column=0, pady=10, padx=(10,0))
-    ingrediente1_entry = Entry(frame_simplex)
+    ingrediente1_entry = Entry(frame_simplex, state=DISABLED)
     ingrediente1_entry.grid(row=0, column=1, pady=10)
 
-    ingrediente2_label = Label(frame_simplex, text="Ingrediente 2")
+    ingrediente2_label = Label(frame_simplex, text="Milho")
     ingrediente2_label.grid(row=0, column=2, pady=10, padx=(10,0))
-    ingrediente2_entry = Entry(frame_simplex)
+    ingrediente2_entry = Entry(frame_simplex, state=DISABLED)
     ingrediente2_entry.grid(row=0, column=3, pady=10)
 
-    ingrediente3_label = Label(frame_simplex, text="Ingrediente 3")
-    ingrediente3_label.grid(row=1, column=0, pady=10, padx=(10,0))
-    ingrediente3_entry = Entry(frame_simplex)
-    ingrediente3_entry.grid(row=1, column=1, pady=10)
+    ingrediente3_label = Label(frame_simplex, text="Cana")
+    ingrediente3_label.grid(row=0, column=4, pady=10, padx=(10,0))
+    ingrediente3_entry = Entry(frame_simplex, state=DISABLED)
+    ingrediente3_entry.grid(row=0, column=5, pady=10)
 
-    ingrediente4_label = Label(frame_simplex, text="Ingrediente 4")
-    ingrediente4_label.grid(row=1, column=2, pady=10, padx=(10,0))
-    ingrediente4_entry = Entry(frame_simplex)
-    ingrediente4_entry.grid(row=1, column=3, pady=10)
+    ingrediente4_label = Label(frame_simplex, text="Algodão")
+    ingrediente4_label.grid(row=1, column=0, pady=10, padx=(10,0))
+    ingrediente4_entry = Entry(frame_simplex, state=DISABLED)
+    ingrediente4_entry.grid(row=1, column=1, pady=10)
 
-    botao_calcular = Button(frame_simplex, text="Calcular", command=simplex)
-    botao_calcular.grid(row=2, column=0, pady=10, padx=10)
+    ingrediente5_label = Label(frame_simplex, text="Sal Mineral")
+    ingrediente5_label.grid(row=1, column=2, pady=10, padx=(10,0))
+    ingrediente5_entry = Entry(frame_simplex, state=DISABLED)
+    ingrediente5_entry.grid(row=1, column=3, pady=10)
+
+
+    frame_final = Frame(root)
+    frame_final.pack(fill="x", pady=10, padx=10)
+
+
+    botao_calcular = Button(frame_final, text="Calcular", command=simplex)
+    botao_calcular.grid(row=0, column=0, pady=10, padx=10)
     
 #-----------------------------------------------------------------------------------------
 
@@ -1507,7 +1581,6 @@ def janela_estoque():
         item_entry.delete(0, END)
         quantidade_entry.delete(0, END)
         
-
         selecionado = my_tree.focus()
 
         valor = my_tree.item(selecionado, 'values')
