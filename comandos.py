@@ -15,12 +15,9 @@ try:
 except Error as e:
     print(e)
 
-cursor.execute("ALTER TABLE animais ADD raca VARCHAR(255)")
-
-cursor.execute("SELECT * FROM animais")
-print(cursor.fetchall())
-
-
+cursor.execute("CREATE VIEW despesas AS SELECT fornecedores.nome, estoque.item, transacao.valor_unitario, transacao.quantidade, transacao.valor_unitario*transacao.quantidade FROM fornecedores, estoque, transacao WHERE transacao.f_id=fornecedores.cnpj AND transacao.e_id=estoque.id")
+#cursor.execute("SHOW TABLES")
+#print(cursor.fetchall())
 
 conexao.commit()
 conexao.close()

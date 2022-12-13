@@ -7,7 +7,8 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS animais (
         peso DECIMAL(5,2),
         sexo VARCHAR(10),
         mae_tag INT(10) REFERENCES animais(tag),
-        pai_tag INT(10) REFERENCES animais(tag))
+        pai_tag INT(10) REFERENCES animais(tag)),
+        raca VARCHAR(255)
         """)
 
 
@@ -74,11 +75,13 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS fornecedores (
 
 cursor.execute("""CREATE TABLE IF NOT EXISTS transacao (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        f_id INT(15),
+        f_id INT,
         e_id INT,
         data DATE,
         quantidade DECIMAL(10,2),
-        valor_unitario DECIMAL(10,2)
+        valor_unitario DECIMAL(10,2),
+        FOREIGN KEY (f_id) REFERENCES fornecedores(cnpj),
+        FOREIGN KEY (e_id) REFERENCES estoque(id)
         )""")  
 
 
@@ -86,6 +89,8 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS transacao (
 VIEWS
 
 cursor.execute("CREATE VIEW vacinados AS SELECT animais.tag, vacinacao.vacina_id, vacinas.nome, vacinacao.data FROM animais, vacinacao, vacinas WHERE animais.tag = vacinacao.animais_tag AND vacinacao.vacina_id = vacinas.id")
+
+cursor.execute("CREATE VIEW despesas AS SELECT fornecedores.nome, estoque.item, transacao.valor_unitario, transacao.quantidade FROM fornecedores, estoque, transacao WHERE transacao.f_id=fornecedores.cnpj AND transacao.e_id=estoque.id")
 
 -----------------------------------------------------------------------------
 #parte do banco para a ração
