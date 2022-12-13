@@ -12,26 +12,14 @@ try:
     )
     #criando o cursor
     cursor = conexao.cursor()
-    print("Cursor criado")
 except Error as e:
     print(e)
 
-cursor.execute("SELECT tag FROM animais WHERE tipo = 'Bovino' ")
-reusltado = cursor.fetchall()
+cursor.execute("ALTER TABLE animais ADD raca VARCHAR(255)")
 
+cursor.execute("SELECT * FROM animais")
+print(cursor.fetchall())
 
-
-print(reusltado)
-
-for animal in reusltado:
-    print(animal)
-    print(animal[0])
-    sql= "INSERT INTO vacinacao (vacina_id, animais_tag, data) VALUES (%s, %s, %s)"
-    vaalores = (str(1), str(animal[0]), "2022-10-10" )
-    try:
-        cursor.execute(sql, vaalores)
-    except Error as e:
-        print(e)
 
 
 conexao.commit()

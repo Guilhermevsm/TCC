@@ -114,9 +114,9 @@ def query_database(tabela):
         num = 0
         for itens in dados:
             if num % 2 == 0:
-                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][1], dados[num][2], dados[num][3], dados[num][4], dados[num][5], dados[num][6]), tags=('evenrow', ))
+                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][1], dados[num][7], dados[num][2], dados[num][3], dados[num][4], dados[num][5], dados[num][6]), tags=('evenrow', ))
             else:
-                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][1], dados[num][2], dados[num][3], dados[num][4], dados[num][5], dados[num][6]), tags=('oddrow', ))
+                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][1], dados[num][7], dados[num][2], dados[num][3], dados[num][4], dados[num][5], dados[num][6]), tags=('oddrow', ))
             num += 1
 
     elif tabela == "vacinas":   
@@ -299,7 +299,7 @@ def atualizar_dados(tabela):
         
         if tabela == "animais":
             #atualizando o banco
-            sql = "UPDATE animais SET tag = %s, tipo = %s, data_nascimento = %s, peso = %s, sexo = %s, mae_tag = %s, pai_tag = %s WHERE tag = %s "
+            sql = "UPDATE animais SET tag = %s, tipo = %s, data_nascimento = %s, peso = %s, sexo = %s, mae_tag = %s, pai_tag = %s, raca = %s WHERE tag = %s "
 
             tag = str(tag_entry.get())
             tipo = str(tipo_entry.get())
@@ -308,8 +308,9 @@ def atualizar_dados(tabela):
             sexo = str(sexo_entry.get())
             mae_tag = str(mae_tag_entry.get())
             pai_tag = str(pai_tag_entry.get())
+            raca = str(raca_entry.get())
 
-            dados = (tag, tipo, data_nascimento, peso, sexo, mae_tag, pai_tag, tag)
+            dados = (tag, tipo, data_nascimento, peso, sexo, mae_tag, pai_tag, raca, tag)
             try:
                 cursor.execute(sql, dados)
             except Error as e:
@@ -586,8 +587,8 @@ def adicionar_ao_banco(tabela):
                 aviso = messagebox.showerror(title="ERRO", message="Não foi possível adicionar ao banco! \nErro: " + str(e))
 
         elif tabela == "animais":
-            sql = "INSERT INTO animais (tag, tipo, data_nascimento, peso, sexo, mae_tag, pai_tag) VALUES (%s, %s, %s, %s, %s, %s, %s)"
-            valores = (str(tag_entry.get()), str(tipo_entry.get()), str(data_nascimento_entry.get()), str(peso_entry.get()), str(sexo_entry.get()), str(mae_tag_entry.get()), str(pai_tag_entry.get()))
+            sql = "INSERT INTO animais (tag, tipo, data_nascimento, peso, sexo, mae_tag, pai_tag, raca) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+            valores = (str(tag_entry.get()), str(tipo_entry.get()), str(data_nascimento_entry.get()), str(peso_entry.get()), str(sexo_entry.get()), str(mae_tag_entry.get()), str(pai_tag_entry.get()), str(raca_entry.get()))
 
             try:
                 cursor.execute(sql, valores)
@@ -868,16 +869,16 @@ def restaurar_backup():
                     cursor.execute(sql, info2)
         csvfile.close()
 
-        sql = "INSERT INTO animais (tag, tipo, data_nascimento, peso, sexo, mae_tag, pai_tag) VALUES (%s, %s, %s, %s, %s, %s, %s)"       
+        sql = "INSERT INTO animais (tag, tipo, data_nascimento, peso, sexo, mae_tag, pai_tag, raca) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"       
         with open('backup_animais.csv', newline='') as csvfile:
             spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
             for row in spamreader:
-                info = (row[0], row[1], row[2], row[3], row[4], row[5], row[6])
+                info = (row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7])
                 try:
                     cursor.execute(sql, info)
                 except:
-                    sql = "UPDATE animais SET tipo = %s, data_nascimento = %s, peso = %s, sexo = %s, mae_tag = %s, pai_tag = %s WHERE tag = %s "
-                    info2 = (str(row[1]), str(row[2]), str(row[3]), str(row[4]), str(row[5]), str(row[6]), str(row[0]))
+                    sql = "UPDATE animais SET tipo = %s, data_nascimento = %s, peso = %s, sexo = %s, mae_tag = %s, pai_tag = %s, raca = %s WHERE tag = %s "
+                    info2 = (str(row[1]), str(row[2]), str(row[3]), str(row[4]), str(row[5]), str(row[6]), str(row[7]), str(row[0]))
                     cursor.execute(sql, info2)
         csvfile.close()
 
@@ -1254,11 +1255,13 @@ def janela_animais():
     def selecionar_dados_arvore(e):
         tag_entry.delete(0, END)
         tipo_entry.delete(0, END)
+        raca_entry.delete(0, END)
         data_nascimento_entry.delete(0, END)
         peso_entry.delete(0, END)
         sexo_entry.delete(0, END)
         mae_tag_entry.delete(0, END)
         pai_tag_entry.delete(0, END)
+       
 
         selecionado = my_tree.focus()
 
@@ -1266,13 +1269,15 @@ def janela_animais():
 
         tag_entry.insert(0, valor[0])
         tipo_entry.insert(0, valor[1])
-        data_nascimento_entry.insert(0, valor[2])
-        peso_entry.insert(0, valor[3])
-        sexo_entry.insert(0, valor[4])
-        mae_tag_entry.insert(0, valor[5])
-        pai_tag_entry.insert(0, valor[6])
+        raca_entry.insert(0, valor[2])
+        data_nascimento_entry.insert(0, valor[3])
+        peso_entry.insert(0, valor[4])
+        sexo_entry.insert(0, valor[5])
+        mae_tag_entry.insert(0, valor[6])
+        pai_tag_entry.insert(0, valor[7])
+        
 
-    root.geometry("1030x500")
+    root.geometry("1200x600")
     
     #adicionando estilo
     style = ttk.Style()
@@ -1298,10 +1303,11 @@ def janela_animais():
     tree_scroll.config(command=my_tree.yview)
 
     #difinindo as colunas
-    my_tree['columns'] = ("TAG", "Tipo", "Nascimento", "Peso", "Sexo", "Mãe", "Pai")
+    my_tree['columns'] = ("TAG", "Tipo", "Raça", "Nascimento", "Peso", "Sexo", "Mãe", "Pai")
     my_tree.column("#0", width=0, stretch=NO)
     my_tree.column("TAG", width=140, anchor=W)
     my_tree.column("Tipo", width=140, anchor=W)
+    my_tree.column("Raça", width=140, anchor=CENTER)
     my_tree.column("Nascimento", width=140, anchor=CENTER)
     my_tree.column("Peso", width=140, anchor=CENTER)
     my_tree.column("Sexo", width=140, anchor=CENTER)
@@ -1312,6 +1318,7 @@ def janela_animais():
     my_tree.heading("#0", text="", anchor=W)
     my_tree.heading("TAG", text="TAG", anchor=W)
     my_tree.heading("Tipo", text="Tipo", anchor=W)
+    my_tree.heading("Raça", text="Raça", anchor=CENTER)
     my_tree.heading("Nascimento", text="Nascimento", anchor=CENTER)
     my_tree.heading("Peso", text="Peso", anchor=CENTER)
     my_tree.heading("Sexo", text="Sexo", anchor=CENTER)
@@ -1342,24 +1349,29 @@ def janela_animais():
     data_nascimento_entry.grid(row=0, column=5, padx=10, pady=10)
     global peso_entry
     peso_label = Label(data_frame, text="Peso")
-    peso_label.grid(row=1, column=0, padx=10, pady=10)
+    peso_label.grid(row=0, column=6, padx=10, pady=10)
     peso_entry = Entry(data_frame)
-    peso_entry.grid(row=1, column=1, padx=10, pady=10)
+    peso_entry.grid(row=0, column=7, padx=10, pady=10)
     global sexo_entry
     sexo_label = Label(data_frame, text="Sexo")
-    sexo_label.grid(row=1, column=2, padx=10, pady=10)
+    sexo_label.grid(row=1, column=0, padx=10, pady=10)
     sexo_entry = Entry(data_frame)
-    sexo_entry.grid(row=1, column=3, padx=10, pady=10)
+    sexo_entry.grid(row=1, column=1, padx=10, pady=10)
     global mae_tag_entry
     mae_tag_label = Label(data_frame, text="Mãe")
-    mae_tag_label.grid(row=1, column=4, padx=10, pady=10)
+    mae_tag_label.grid(row=1, column=2, padx=10, pady=10)
     mae_tag_entry = Entry(data_frame)
-    mae_tag_entry.grid(row=1, column=5, padx=10, pady=10)
+    mae_tag_entry.grid(row=1, column=3, padx=10, pady=10)
     global pai_tag_entry
     pai_tag_label = Label(data_frame, text="Pai")
-    pai_tag_label.grid(row=1, column=6, padx=10, pady=10)
+    pai_tag_label.grid(row=1, column=4, padx=10, pady=10)
     pai_tag_entry = Entry(data_frame)
-    pai_tag_entry.grid(row=1, column=7, padx=10, pady=10)
+    pai_tag_entry.grid(row=1, column=5, padx=10, pady=10)
+    global raca_entry
+    raca_label = Label(data_frame, text="Raça")
+    raca_label.grid(row=1, column=6, padx=10, pady=10)
+    raca_entry = Entry(data_frame)
+    raca_entry.grid(row=1, column=7, padx=10, pady=10)
     
     query_database("animais")
 
