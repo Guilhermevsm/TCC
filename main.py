@@ -6,10 +6,11 @@ from tkinter import messagebox
 from scipy.optimize import linprog
 import csv
 import os
+import datetime
 
 root = Tk()
 root.title('Casima Agrícola')
-root.iconbitmap('python.ico')
+root.iconbitmap('./python.ico')
 root.geometry("1000x600")
 
 #conectando ao banco
@@ -215,6 +216,18 @@ def query_database(tabela):
                 my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][2], dados[num][3]), tags=('oddrow', ))
             num += 1
 
+    elif tabela == "rebanho":   
+        cursor.execute("SELECT * FROM vacinados")
+        dados = cursor.fetchall()
+        #print(dados)
+        num = 0
+        for itens in dados:
+            if num % 2 == 0:
+                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][2], dados[num][3]), tags=('evenrow', ))
+            else:
+                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][2], dados[num][3]), tags=('oddrow', ))
+            num += 1
+
     elif tabela == "animal_vacinado":
         animal = vacinados_tag_entry.get()
         
@@ -222,7 +235,6 @@ def query_database(tabela):
             cursor.execute("SELECT * FROM vacinados WHERE tag = %s ", (animal, ))
         except Error as e:
             aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel se conectar ao banco de dados \nErro: " + str(e))
-            print("Conexão com o banco não foi sucedida!")
         dados = cursor.fetchall()
 
         num = 0
@@ -240,7 +252,6 @@ def query_database(tabela):
             cursor.execute("SELECT * FROM vacinados WHERE nome = %s ", (vacina, ))
         except Error as e:
             aviso = messagebox.showerror(title="Falha na Conexão", message="Não foi possivel se conectar ao banco de dados \nErro: " + str(e))
-            print("Conexão com o banco não foi sucedida!")
         dados = cursor.fetchall()
 
         num = 0
@@ -654,6 +665,32 @@ def adicionar_ao_banco(tabela):
                 cursor.execute(sql, valores)
             except Error as e:
                 aviso = messagebox.showerror(title="ERRO", message="Não foi possível adicionar ao banco! \nErro: " + str(e))
+        
+        elif tabela == "rebanho":
+            sql = "SELECT * FROM vacinas WHERE nome = %s"
+            vacina = (str(vacina_selecionada.get()), )
+            try:
+                cursor.execute(sql, vacina)
+            except Error as e:
+                aviso = messagebox.showerror(title="ERRO", message="Erro no banco de dados! \nErro: " + str(e))
+            vacina_id = cursor.fetchall()
+            
+            sql = "SELECT tag FROM animais WHERE tipo = %s"
+            rebanho = (str(rebanho_selecionado.get()), )
+            try:
+                cursor.execute(sql, rebanho)
+            except Error as e:
+                aviso = messagebox.showerror(title="ERRO", message="Erro no banco de dados! \nErro: " + str(e))
+            animais = cursor.fetchall()
+            
+            for animal_tag in animais:
+                sql = "INSERT INTO vacinacao (vacina_id, animais_tag, data) VALUES (%s, %s, %s)"
+                valores = (str(vacina_id[0][0]), str(animal_tag[0]), str(datetime.date.today()))
+                try:
+                    cursor.execute(sql, valores)
+                except Error as e:
+                    aviso = messagebox.showerror(title="ERRO", message="Não foi possível adicionar ao banco! \nErro: " + str(e))
+                    return
 
         conexao.commit()
         conexao.close()
@@ -2136,6 +2173,44 @@ def janela_transacao():
 
 #criando a janela para a view vacinados
 def janela_vacinados():
+    #funcao para pegar todas vacinas adiciondas no banco
+    def receber_vacinas():
+        try:
+            conexao = mysql.connector.connect(
+                host = "localhost",
+                user = "root",
+                passwd = "aneis1961",
+                database = "casima"
+            )
+            #criando o cursor
+            cursor = conexao.cursor()
+        except Error as e:
+            aviso = messagebox.showerror(title="ERRO", message="Erro na conexão com o banco! \nErro: " + str(e))
+    
+        cursor.execute("SELECT nome FROM vacinas")
+        resultado = cursor.fetchall()
+        return resultado
+
+    #funcao para pegar todos tipos de rebanhos
+    def receber_rebanho():
+        try:
+            conexao = mysql.connector.connect(
+                host = "localhost",
+                user = "root",
+                passwd = "aneis1961",
+                database = "casima"
+            )
+            #criando o cursor
+            cursor = conexao.cursor()
+        except Error as e:
+            aviso = messagebox.showerror(title="ERRO", message="Erro na conexão com o banco! \nErro: " + str(e))
+    
+        cursor.execute("SELECT tipo FROM animais")
+        resultado = cursor.fetchall()
+        resultado = list(dict.fromkeys(resultado))
+        return resultado
+            
+
     for widgets in root.winfo_children():
         widgets.destroy()
     cria_menu()
@@ -2190,7 +2265,7 @@ def janela_vacinados():
     query_database("vacinados")
 
     #adicionando botões
-    selecinonar_frame = LabelFrame(root, text="Escolher")
+    selecinonar_frame = LabelFrame(root, text="Vizualizar")
     selecinonar_frame.pack(fill="x", expand="yes", padx=20)
     my_label = Label(selecinonar_frame, text="Escolher Animal ou Vacina")
     my_label.grid(row=0, column=0, pady=10)
@@ -2199,18 +2274,42 @@ def janela_vacinados():
     vacinados_tag_entry.grid(row=0, column=1, pady=10)
 
     #adicionando botões
-    button_frame = LabelFrame(root, text="Ações")
-    button_frame.pack(fill="x", expand="yes", padx=20)
+    update_button = Button(selecinonar_frame, text="Selecionar Animal", command=lambda:query_database("animal_vacinado"))
+    update_button.grid(row=1 , column=0 , padx=10, pady=10)
 
-    update_button = Button(button_frame, text="Selecionar Animal", command=lambda:query_database("animal_vacinado"))
-    update_button.grid(row=0 , column=0 , padx=10, pady=10)
+    update2_button = Button(selecinonar_frame, text="Selecionar Vacina", command=lambda:query_database("vacina_vacinado"))
+    update2_button.grid(row=1 , column=1 , padx=10, pady=10)
 
-    update2_button = Button(button_frame, text="Selecionar Vacina", command=lambda:query_database("vacina_vacinado"))
-    update2_button.grid(row=0 , column=1 , padx=10, pady=10)
+    limpar_button = Button(selecinonar_frame, text="Restaurar Tabela", command=lambda:query_database("vacinados"))
+    limpar_button.grid(row=1 , column=2 , padx=10, pady=10)
 
-    limpar_button = Button(button_frame, text="Restaurar Tabela", command=lambda:query_database("vacinados"))
-    limpar_button.grid(row=0 , column=2 , padx=10, pady=10)
+    frame_vacinar = LabelFrame(root, text="Vacinar Rebanho")
+    frame_vacinar.pack(fill="x", expand="yes", padx=20)
     
+    selecionar_vacina_label = Label(frame_vacinar, text="Selecione a vacina: ")
+    selecionar_vacina_label.grid(row=0, column=0, padx=10, pady=10)
+    global vacina_selecionada
+    vacina_selecionada = StringVar()
+    selecionar_vacina = ttk.Combobox(frame_vacinar, textvariable=vacina_selecionada)
+    
+    selecionar_vacina['values'] = receber_vacinas()
+    selecionar_vacina['state'] = 'readonly'
+
+    selecionar_vacina.grid(row=0, column=1, padx=10, pady=10)
+
+    selecionar_rebanho_label = Label(frame_vacinar, text="Selecione o rebanho: ")
+    selecionar_rebanho_label.grid(row=0, column=2, padx=10, pady=10)
+    global rebanho_selecionado
+    rebanho_selecionado = StringVar()
+    selecionar_rebanho = ttk.Combobox(frame_vacinar, textvariable=rebanho_selecionado)
+    
+    selecionar_rebanho['values'] = receber_rebanho()
+    selecionar_rebanho['state'] = 'readonly'
+
+    selecionar_rebanho.grid(row=0, column=3, padx=10, pady=10)
+
+    botao_vainar = Button(frame_vacinar, text="Vacinar", width=20, command=lambda:adicionar_ao_banco("rebanho"))
+    botao_vainar.grid(row=0, column=4, padx=10, pady=10)
 
 #-----------------------------------------------------------------------------------------
 
