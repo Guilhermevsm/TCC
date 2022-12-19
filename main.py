@@ -57,7 +57,6 @@ def cria_menu():
     menu_principal.add_cascade(label="Views", menu=menu_views)
     menu_views.add_command(label="Animais Vacinados", command=janela_vacinados)
     menu_views.add_command(label="Decendentes", command=janela_filhos)
-    menu_views.add_command(label="Despesas", command=janela_despesas)
 
     menu_racao = Menu(menu_principal, tearoff=0)
     menu_principal.add_cascade(label="Ração", menu=menu_racao)
@@ -194,15 +193,15 @@ def query_database(tabela):
             num += 1
 
     elif tabela == "transacao":   
-        cursor.execute("SELECT *, quantidade * valor_unitario FROM transacao")
+        cursor.execute("SELECT transacao.*, transacao.quantidade * valor_unitario, estoque.id, estoque.item FROM transacao, estoque WHERE estoque.id = transacao.e_id ")
         dados = cursor.fetchall()
         #print(dados)
         num = 0
         for itens in dados:
             if num % 2 == 0:
-                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][1], dados[num][2], dados[num][3], dados[num][4], dados[num][5], dados[num][6]), tags=('evenrow', ))
+                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][1], dados[num][2], dados[num][8], dados[num][3], dados[num][4], dados[num][5], dados[num][6]), tags=('evenrow', ))
             else:
-                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][1], dados[num][2], dados[num][3], dados[num][4], dados[num][5], dados[num][6]), tags=('oddrow', ))
+                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][1], dados[num][2], dados[num][8], dados[num][3], dados[num][4], dados[num][5], dados[num][6]), tags=('oddrow', ))
             num += 1
     
     elif tabela == "vacinados":   
@@ -274,19 +273,6 @@ def query_database(tabela):
             else:
                 my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][1], dados[num][2], dados[num][3], dados[num][4], dados[num][5], dados[num][6], dados[num][7], dados[num][8], dados[num][9], dados[num][10], dados[num][11], dados[num][12], dados[num][13], dados[num][14], dados[num][15], dados[num][16], dados[num][17], dados[num][18]), tags=('oddrow', ))
             num += 1
-
-    elif tabela == "despesas":   
-        cursor.execute("SELECT *, quantidade * valor_unitario FROM despesas")
-        dados = cursor.fetchall()
-        #print(dados)
-        num = 0
-        for itens in dados:
-            if num % 2 == 0:
-                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][1], dados[num][2], dados[num][3], dados[num][4]), tags=('evenrow', ))
-            else:
-                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][1], dados[num][2], dados[num][3], dados[num][4]), tags=('oddrow', ))
-            num += 1
-
 
     #dando commit
     conexao.commit()
@@ -2084,17 +2070,16 @@ def janela_transacao():
         valor_unitario_transacao_entry.delete(0, END)
 
         selecionado = my_tree.focus()
-
         valor = my_tree.item(selecionado, 'values')
 
         id_transacao_entry.insert(0, valor[0])
         f_id_transacao_entry.insert(0, valor[1])
-        e_id_transacao_entry.insert(0, valor[2])
-        data_transacao_entry.insert(0, valor[3])
-        quantidade_transacao_entry.insert(0, valor[4])
-        valor_unitario_transacao_entry.insert(0, valor[5])
-        
-    root.geometry("1030x500")
+        e_id_transacao_entry.insert(0,valor[2])
+        data_transacao_entry.insert(0, valor[4])
+        quantidade_transacao_entry.insert(0, valor[5])
+        valor_unitario_transacao_entry.insert(0, valor[6])
+            
+    root.geometry("1200x500")
     
     #adicionando estilo
     style = ttk.Style()
@@ -2120,10 +2105,11 @@ def janela_transacao():
     tree_scroll.config(command=my_tree.yview)
 
     #difinindo as colunas
-    my_tree['columns'] = ("ID", "Fornecedor", "Item", "Data", "Quantidade", "Valor Unitário", "Valor Total")
+    my_tree['columns'] = ("ID", "Fornecedor", "Item-ID", "Item", "Data", "Quantidade", "Valor Unitário", "Valor Total")
     my_tree.column("#0", width=0, stretch=NO)
     my_tree.column("ID", width=140, anchor=W)
     my_tree.column("Fornecedor", width=140, anchor=W)
+    my_tree.column("Item-ID", width=140, anchor=CENTER)
     my_tree.column("Item", width=140, anchor=CENTER)
     my_tree.column("Data", width=140, anchor=CENTER)
     my_tree.column("Quantidade", width=140, anchor=CENTER)
@@ -2134,6 +2120,7 @@ def janela_transacao():
     my_tree.heading("#0", text="", anchor=W)
     my_tree.heading("ID", text="ID", anchor=W)
     my_tree.heading("Fornecedor", text="Fornecedor", anchor=W)
+    my_tree.heading("Item-ID", text="Item-ID", anchor=CENTER)
     my_tree.heading("Item", text="Item", anchor=CENTER)
     my_tree.heading("Data", text="Data", anchor=CENTER)
     my_tree.heading("Quantidade", text="Quantidade", anchor=CENTER)
@@ -2190,7 +2177,7 @@ def janela_transacao():
     add_button = Button(button_frame, text="Adicionar", command=lambda:adicionar_ao_banco("transacao"))
     add_button.grid(row=0 , column=1 , padx=10, pady=10)
 
-    remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("transacao", id_transacao_entry.get()))
+    remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("transacao", e_id_transacao_entry.get()))
     remove_all_button.grid(row=0 , column=2 , padx=10, pady=10)
 
     #bind th treeview
@@ -2697,121 +2684,6 @@ def janela_ingredientes():
 
 #-----------------------------------------------------------------------------------------
 
-#criar a janela para a view despesas
-def janela_despesas():
-    for widgets in root.winfo_children():
-        widgets.destroy()
-    cria_menu()
-    def selecionar_dados_arvore(e):
-        despesa_fornecedor_entry.delete(0, END)
-        despesas_item_entry.delete(0, END)
-        despesas_valor_uni_entry.delete(0, END)
-        despesas_quantidade_entry.delete(0, END)
-        despesas_valor_total_entry.delete(0, END)
-        
-
-        selecionado = my_tree.focus()
-
-        valor = my_tree.item(selecionado, 'values')
-
-        despesa_fornecedor_entry.insert(0, valor[0])
-        despesas_item_entry.insert(0, valor[1])
-        despesas_valor_uni_entry.insert(0, valor[2])
-        despesas_quantidade_entry.insert(0, valor[3])
-        despesas_valor_total_entry.insert(0, valor[4])
-        
-        
-    root.geometry("1030x500")
-    
-    #adicionando estilo
-    style = ttk.Style()
-    style.theme_use('default')
-    style.configure("Treeview", background="#D3D3D3", foreground="black", rowheight=25, fieldbackground="#D3D3D3")
-    style.map('Treeview', background=[('selected', "#347083")])
-
-    global my_tree
-
-    #criando frame da treeview
-    frame_despesas = Frame(root)
-    frame_despesas.pack(pady=10)
-
-    #criando o scroll da treeview
-    tree_scroll = Scrollbar(frame_despesas)
-    tree_scroll.pack(side=RIGHT, fill=Y)
-
-    #criando a treeview
-    my_tree = ttk.Treeview(frame_despesas, yscrollcommand=tree_scroll.set, selectmode="extended")
-    my_tree.pack()
-
-    #configurando o scroll
-    tree_scroll.config(command=my_tree.yview)
-
-    #difinindo as colunas
-    my_tree['columns'] = ("Fornecedor", "Produto", "Valor Unitário", "Quantidade", "Valor Total")
-    my_tree.column("#0", width=0, stretch=NO)
-    my_tree.column("Fornecedor", width=140, anchor=W)
-    my_tree.column("Produto", width=140, anchor=W)
-    my_tree.column("Valor Unitário", width=140, anchor=CENTER)
-    my_tree.column("Quantidade", width=140, anchor=CENTER)
-    my_tree.column("Valor Total", width=140, anchor=CENTER)
-    
-    #criando as headings
-    my_tree.heading("#0", text="", anchor=W)
-    my_tree.heading("Fornecedor", text="Fornecedor", anchor=W)
-    my_tree.heading("Produto", text="Item", anchor=CENTER)
-    my_tree.heading("Valor Unitário", text="Valor Unitário", anchor=CENTER)
-    my_tree.heading("Quantidade", text="Quantidade", anchor=CENTER)
-    my_tree.heading("Valor Total", text="Valor Total", anchor=CENTER)
-
-    #alternando as cores das linhas
-    my_tree.tag_configure('oddrow', background="white")
-    my_tree.tag_configure('evenrow', background="lightblue")
-
-    #adicionando as caixas de entrada
-    data_frame = LabelFrame(root, text="Despesas")
-    data_frame.pack(fill="x", expand="yes", padx=20)
-    global despesa_fornecedor_entry
-    despesa_fornecedor_label = Label(data_frame, text="Fornecedor")
-    despesa_fornecedor_label.grid(row=0, column=0, padx=10, pady=10)
-    despesa_fornecedor_entry = Entry(data_frame)
-    despesa_fornecedor_entry.grid(row=0, column=1, padx=10, pady=10)
-    global despesas_item_entry
-    despesas_item_label = Label(data_frame, text="Produto")
-    despesas_item_label.grid(row=0, column=2, padx=10, pady=10)
-    despesas_item_entry = Entry(data_frame)
-    despesas_item_entry.grid(row=0, column=3, padx=10, pady=10)
-    global despesas_valor_uni_entry
-    despesas_valor_uni_label = Label(data_frame, text="Valor Unitário")
-    despesas_valor_uni_label.grid(row=0, column=4, padx=10, pady=10)
-    despesas_valor_uni_entry = Entry(data_frame)
-    despesas_valor_uni_entry.grid(row=0, column=5, padx=10, pady=10)
-    global despesas_quantidade_entry
-    despesas_quantidade_label = Label(data_frame, text="Quantidade")
-    despesas_quantidade_label.grid(row=1, column=0, padx=10, pady=10)
-    despesas_quantidade_entry = Entry(data_frame)
-    despesas_quantidade_entry.grid(row=1, column=1, padx=10, pady=10)
-    global despesas_valor_total_entry
-    despesas_valor_total_label = Label(data_frame, text="Valor Total")
-    despesas_valor_total_label.grid(row=1, column=2, padx=10, pady=10)
-    despesas_valor_total_entry = Entry(data_frame)
-    despesas_valor_total_entry.grid(row=1, column=3, padx=10, pady=10)
-    
-    
-    query_database("despesas")
-
-    #adicionando botões
-    button_frame = LabelFrame(root, text="Ações")
-    button_frame.pack(fill="x", expand="yes", padx=20)
-
-    update_button = Button(button_frame, text="Nada")
-    update_button.grid(row=0 , column=0 , padx=10, pady=10)
-
-    #bind th treeview
-    my_tree.bind("<ButtonRelease-1>", selecionar_dados_arvore)
-
-
-
-#-----------------------------------------------------------------------------------------
 
 cria_menu()
 frame_incial = LabelFrame(root, text="")
