@@ -1,6 +1,8 @@
-0,Raiva,21 dias após primeira dose
-1,teste,21 dias após primeira dose
-2,Covid,3 meses após primeira dose
-3,Brucelose,Sem reforço
-4,Gripe,Sem213231
-5,aasdfghjk,Sem213231
+1,Clotridioses,21 dias após a primeira dose,Fazer a primeira dose aos 4 meses de vida,Fazer revacinação anual
+2,Raiva,21 dias após a primeira dose,Fazer a primeira dose aos 4 meses de vida,Fazer revacinação anual
+3,Brucelose,"Sem reforço, é dose única",Vacinar todas as fêmeas entre 3 e 8 meses de vida,Vacinar apenas as fêmeas
+4,Esfera Reprodutiva,Anualmente antes do inicio da estação de monta,Vacinar novilhas e vacas em idade reprodutiva 60 e 30 dias antes da estação de monta,
+5,Febre Aftosa,,Deve seguir o calendário do ministério da agricultura,
+6,Controle Carrapatos,,Fazer controle de acordo com a infestação,
+7,Mosca do Chifre,,Fazer controle de acordo com a infestação,
+8,Verminose,É obrigatório a aplicação em todos animais na desmama ao 7 meses de vida,"Aplicação nos meses de Maio, Agosto e Novembro","Na desmama, usar vermifogos de longa ação, 3% concertação"

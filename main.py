@@ -126,9 +126,9 @@ def query_database(tabela):
         num = 0
         for itens in dados:
             if num % 2 == 0:
-                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][1], dados[num][2]), tags=('evenrow', ))
+                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][1], dados[num][3], dados[num][2], dados[num][4]), tags=('evenrow', ))
             else:
-                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][1], dados[num][2]), tags=('oddrow', ))
+                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][1], dados[num][3], dados[num][2], dados[num][4]), tags=('oddrow', ))
             num += 1
 
     elif tabela == "vacinacao":   
@@ -336,13 +336,15 @@ def atualizar_dados(tabela):
 
         elif tabela == "vacinas":
             #atualizando o banco
-            sql = "UPDATE vacinas SET nome = %s, reforco = %s WHERE id = %s "
+            sql = "UPDATE vacinas SET nome = %s, reforco = %s, modo_usar = %s, obs = %s WHERE id = %s "
 
             id_vacina = str(id_vacina_entry.get())
             nome_vacina = str(nome_vacina_entry.get())
             reforco = str(reforco_entry.get())
+            modo_uso = str(modo_uso_entry.get())
+            obs = str(obs_vacina_entry.get())
 
-            dados = (nome_vacina, reforco, id_vacina)
+            dados = (nome_vacina, reforco, id_vacina, modo_uso, obs)
             try:
                 cursor.execute(sql, dados)
             except Error as e:
@@ -596,8 +598,8 @@ def adicionar_ao_banco(tabela):
                 aviso = messagebox.showerror(title="ERRO", message="Não foi possível adicionar ao banco! \nErro: " + str(e))
 
         elif tabela == "vacinas":
-            sql = "INSERT INTO vacinas (id, nome, reforco) VALUES (%s, %s, %s)"
-            valores = (str(id_vacina_entry.get()), str(nome_vacina_entry.get()), str(reforco_entry.get()))
+            sql = "INSERT INTO vacinas (id, nome, reforco, modo_usar, obs) VALUES (%s, %s, %s, %s, %s)"
+            valores = (str(id_vacina_entry.get()), str(nome_vacina_entry.get()), str(reforco_entry.get()), str(modo_uso_entry.get()), str(obs_vacina_entry.get()))
 
             try:
                 cursor.execute(sql, valores)
@@ -882,7 +884,7 @@ def restaurar_backup():
                     cursor.execute(sql, info2)
         csvfile.close()
 
-        sql = "INSERT INTO vacinas (id, nome, reforco) VALUES (%s, %s, %s)"       
+        sql = "INSERT INTO vacinas (id, nome, reforco, modo_usar, obs) VALUES (%s, %s, %s, %s, %s)"       
         with open('backup_vacinas.csv', newline='') as csvfile:
             spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
             for row in spamreader:
@@ -890,8 +892,8 @@ def restaurar_backup():
                 try:
                     cursor.execute(sql, info)
                 except:
-                    sql = "UPDATE vacinas SET nome = %s, reforco = %s WHERE id = %s "
-                    info2 = (str(row[1]), str(row[2]), str(row[0]))
+                    sql = "UPDATE vacinas SET nome = %s, reforco = %s, modo_usar = %s, obs = %s WHERE id = %s "
+                    info2 = (str(row[1]), str(row[2]), str(row[3]), str(row[4]), str(row[0]))
                     cursor.execute(sql, info2)
         csvfile.close()
 
@@ -1402,7 +1404,9 @@ def janela_vacinas():
     def selecionar_dados_arvore(e):
         id_vacina_entry.delete(0, END)
         nome_vacina_entry.delete(0, END)
-        reforco_entry.delete(0, END)
+        reforco_entry.delete(0, END),
+        modo_uso_entry.delete(0, END)
+        obs_vacina_entry.delete(0, END)
         
 
         selecionado = my_tree.focus()
@@ -1411,9 +1415,11 @@ def janela_vacinas():
 
         id_vacina_entry.insert(0, valor[0])
         nome_vacina_entry.insert(0, valor[1])
-        reforco_entry.insert(0, valor[2])
+        reforco_entry.insert(0, valor[3])
+        modo_uso_entry.insert(0, valor[2])
+        obs_vacina_entry.insert(0, valor[4])
         
-    root.geometry("910x470")
+    root.geometry("1600x500")
     
     #adicionando estilo
     style = ttk.Style()
@@ -1439,17 +1445,22 @@ def janela_vacinas():
     tree_scroll.config(command=my_tree.yview)
 
     #difinindo as colunas
-    my_tree['columns'] = ("ID", "Nome", "Reforço")
+    my_tree['columns'] = ("ID", "Nome", "Vacinação", "Reforço", "Observação")
     my_tree.column("#0", width=0, stretch=NO)
     my_tree.column("ID", width=80, anchor=W)
     my_tree.column("Nome", width=150, anchor=W)
-    my_tree.column("Reforço", width=600, anchor=CENTER)
+    my_tree.column("Vacinação", width=450, anchor=CENTER)
+    my_tree.column("Reforço", width=450, anchor=CENTER)
+    my_tree.column("Observação", width=450, anchor=CENTER)
+
     
     #criando as headings
     my_tree.heading("#0", text="", anchor=W)
     my_tree.heading("ID", text="ID", anchor=W)
     my_tree.heading("Nome", text="Nome", anchor=W)
+    my_tree.heading("Vacinação", text="Vacinação", anchor=CENTER)
     my_tree.heading("Reforço", text="Reforço", anchor=CENTER)
+    my_tree.heading("Observação", text="Observação", anchor=CENTER)
     
     #alternando as cores das linhas
     my_tree.tag_configure('oddrow', background="white")
@@ -1473,6 +1484,16 @@ def janela_vacinas():
     reforco_label.grid(row=0, column=4, padx=10, pady=10)
     reforco_entry = Entry(data_frame, width=60)
     reforco_entry.grid(row=0, column=5, padx=10, pady=10, columnspan=8)
+    global modo_uso_entry
+    modo_uso = Label(data_frame, text="Vacinação")
+    modo_uso.grid(row=1, column=0, padx=10, pady=10)
+    modo_uso_entry = Entry(data_frame, width=60)
+    modo_uso_entry.grid(row=1, column=1, padx=10, pady=10, columnspan=3)
+    global obs_vacina_entry
+    obs_vacina_label = Label(data_frame, text="Observação")
+    obs_vacina_label.grid(row=1, column=4, padx=10, pady=10)
+    obs_vacina_entry = Entry(data_frame, width=60)
+    obs_vacina_entry.grid(row=1, column=5, padx=10, pady=10, columnspan=4)
     
     query_database("vacinas")
 
@@ -2177,7 +2198,7 @@ def janela_transacao():
     add_button = Button(button_frame, text="Adicionar", command=lambda:adicionar_ao_banco("transacao"))
     add_button.grid(row=0 , column=1 , padx=10, pady=10)
 
-    remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("transacao", e_id_transacao_entry.get()))
+    remove_all_button = Button(button_frame, text="Remover", command=lambda:remover("transacao", id_transacao_entry.get()))
     remove_all_button.grid(row=0 , column=2 , padx=10, pady=10)
 
     #bind th treeview
