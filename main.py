@@ -1305,9 +1305,9 @@ def janela_animais():
     tree_scroll.config(command=my_tree.yview)
 
     #difinindo as colunas
-    my_tree['columns'] = ("TAG", "Tipo", "Raça", "Nascimento", "Peso", "Sexo", "Mãe", "Pai")
+    my_tree['columns'] = ("Brinco", "Tipo", "Raça", "Nascimento", "Peso", "Sexo", "Mãe", "Pai")
     my_tree.column("#0", width=0, stretch=NO)
-    my_tree.column("TAG", width=140, anchor=W)
+    my_tree.column("Brinco", width=140, anchor=W)
     my_tree.column("Tipo", width=140, anchor=W)
     my_tree.column("Raça", width=140, anchor=CENTER)
     my_tree.column("Nascimento", width=140, anchor=CENTER)
@@ -1318,7 +1318,7 @@ def janela_animais():
 
     #criando as headings
     my_tree.heading("#0", text="", anchor=W)
-    my_tree.heading("TAG", text="TAG", anchor=W)
+    my_tree.heading("Brinco", text="Brinco", anchor=W)
     my_tree.heading("Tipo", text="Tipo", anchor=W)
     my_tree.heading("Raça", text="Raça", anchor=CENTER)
     my_tree.heading("Nascimento", text="Nascimento", anchor=CENTER)
@@ -1335,7 +1335,7 @@ def janela_animais():
     data_frame = LabelFrame(root, text="Animais")
     data_frame.pack(fill="x", expand="yes", padx=20)
     global tag_entry
-    tag_label = Label(data_frame, text="TAG")
+    tag_label = Label(data_frame, text="Brinco")
     tag_label.grid(row=0, column=0, padx=10, pady=10)
     tag_entry = Entry(data_frame)
     tag_entry.grid(row=0, column=1, padx=10, pady=10)

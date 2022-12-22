@@ -24,7 +24,9 @@ except Error as e:
     print(e)
 
 
-cursor.execute("ALTER TABLE vacinas ADD obs VARCHAR(255)")
+
+cursor.execute("UPDATE animais SET tipo = 'Bovino'")
+
 
 conexao.commit()
 conexao.close()
