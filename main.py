@@ -1020,48 +1020,68 @@ def janela_simplex():
     def desabilitar_botao(ingrediente):
         if ingrediente == "soja" and ing1.get() == 1:
             ingrediente1_entry.config(state=NORMAL)
+            ingrediente11_entry.config(state=NORMAL)
         elif ingrediente == "soja" and ing1.get() == 0:
             ingrediente1_entry.delete(0, END)
-            #ingrediente1_entry.insert(0, "0")
-            ingrediente1_entry.config(state=DISABLED)           
+            ingrediente1_entry.insert(0, "0")
+            ingrediente1_entry.config(state="readonly") 
+            ingrediente11_entry.delete(0, END)
+            ingrediente11_entry.insert(0, "0")
+            ingrediente11_entry.config(state="readonly")           
 
         if ingrediente == "milho" and ing2.get() == 1:
             ingrediente2_entry.config(state=NORMAL)
+            ingrediente22_entry.config(state=NORMAL)
         elif ingrediente == "milho" and ing2.get() == 0:
             ingrediente2_entry.delete(0, END)
-            #ingrediente2_entry.insert(0, "0")
-            ingrediente2_entry.config(state=DISABLED)
+            ingrediente2_entry.insert(0, "0")
+            ingrediente2_entry.config(state="readonly")
+            ingrediente22_entry.delete(0, END)
+            ingrediente22_entry.insert(0, "0")
+            ingrediente22_entry.config(state="readonly")
             
         if ingrediente == "cana" and ing3.get() == 1:
             ingrediente3_entry.config(state=NORMAL)
+            ingrediente33_entry.config(state=NORMAL)
         elif ingrediente == "cana" and ing3.get() == 0:
             ingrediente3_entry.delete(0, END)
-            #ingrediente3_entry.insert(0, "0")
-            ingrediente3_entry.config(state=DISABLED)
+            ingrediente3_entry.insert(0, "0")
+            ingrediente3_entry.config(state="readonly")
+            ingrediente33_entry.delete(0, END)
+            ingrediente33_entry.insert(0, "0")
+            ingrediente33_entry.config(state="readonly")
         
         if ingrediente == "algodao" and ing4.get() == 1:
             ingrediente4_entry.config(state=NORMAL)
+            ingrediente44_entry.config(state=NORMAL)
         elif ingrediente == "algodao" and ing4.get() == 0:
             ingrediente4_entry.delete(0, END)
-            #ingrediente4_entry.insert(0, "0")
-            ingrediente4_entry.config(state=DISABLED)
+            ingrediente4_entry.insert(0, "0")
+            ingrediente4_entry.config(state="readonly")
+            ingrediente44_entry.delete(0, END)
+            ingrediente44_entry.insert(0, "0")
+            ingrediente44_entry.config(state="readonly")
             
         if ingrediente == "sal" and ing5.get() == 1:
             ingrediente5_entry.config(state=NORMAL)
+            ingrediente55_entry.config(state=NORMAL)
         elif ingrediente == "sal" and ing5.get() == 0:
             ingrediente5_entry.delete(0, END)
-            #ingrediente5_entry.insert(0, "0")
-            ingrediente5_entry.config(state=DISABLED)
+            ingrediente5_entry.insert(0, "0")
+            ingrediente5_entry.config(state="readonly")
+            ingrediente55_entry.delete(0, END)
+            ingrediente55_entry.insert(0, "0")
+            ingrediente55_entry.config(state="readonly")
             
     #criando frame para selecionar especificaacoes
     frame_selecionar = LabelFrame(root, text="Selecionar ingredientes disponíveis")
     frame_selecionar.pack(fill="x", padx=10, pady=10)
 
-    ing1 = IntVar()
-    ing2 = IntVar()
-    ing3 = IntVar()
-    ing4 = IntVar()
-    ing5 = IntVar()
+    ing1 = IntVar(value=1)
+    ing2 = IntVar(value=1)
+    ing3 = IntVar(value=1)
+    ing4 = IntVar(value=1)
+    ing5 = IntVar(value=1)
     
     soja = Checkbutton(frame_selecionar, text="Soja", variable=ing1, command=lambda:desabilitar_botao("soja"))
     milho = Checkbutton(frame_selecionar, text="Milho", variable=ing2, command=lambda:desabilitar_botao("milho"))
@@ -1075,34 +1095,63 @@ def janela_simplex():
     algodao.grid(row=0, column=3, padx=4, pady=4)
     sal_mineral.grid(row=0, column=4, padx=4, pady=4)
     
-    #criando frame do simplex
-    frame_simplex = LabelFrame(root, text="Quantidade disponível de cada ingrediente em Kg")
-    frame_simplex.pack(fill="x", pady=10, padx=10)
+    #criando frame com os entrys do preço dos ingredientes
+    frame_preco = LabelFrame(root, text="Preço do ingrediente por Kg")
+    frame_preco.pack(fill="x", pady=10, padx=10)
 
-    ingrediente1_label = Label(frame_simplex, text="Soja")
+    ingrediente1_label = Label(frame_preco, text="Soja")
     ingrediente1_label.grid(row=0, column=0, pady=10, padx=(10,0))
-    ingrediente1_entry = Entry(frame_simplex, state=DISABLED)
+    ingrediente1_entry = Entry(frame_preco, state=NORMAL)
     ingrediente1_entry.grid(row=0, column=1, pady=10)
 
-    ingrediente2_label = Label(frame_simplex, text="Milho")
+    ingrediente2_label = Label(frame_preco, text="Milho")
     ingrediente2_label.grid(row=0, column=2, pady=10, padx=(10,0))
-    ingrediente2_entry = Entry(frame_simplex, state=DISABLED)
+    ingrediente2_entry = Entry(frame_preco, state=NORMAL)
     ingrediente2_entry.grid(row=0, column=3, pady=10)
 
-    ingrediente3_label = Label(frame_simplex, text="Cana")
+    ingrediente3_label = Label(frame_preco, text="Cana")
     ingrediente3_label.grid(row=0, column=4, pady=10, padx=(10,0))
-    ingrediente3_entry = Entry(frame_simplex, state=DISABLED)
+    ingrediente3_entry = Entry(frame_preco, state=NORMAL)
     ingrediente3_entry.grid(row=0, column=5, pady=10)
 
-    ingrediente4_label = Label(frame_simplex, text="Algodão")
+    ingrediente4_label = Label(frame_preco, text="Algodão")
     ingrediente4_label.grid(row=1, column=0, pady=10, padx=(10,0))
-    ingrediente4_entry = Entry(frame_simplex, state=DISABLED)
+    ingrediente4_entry = Entry(frame_preco, state=NORMAL)
     ingrediente4_entry.grid(row=1, column=1, pady=10)
 
-    ingrediente5_label = Label(frame_simplex, text="Sal Mineral")
+    ingrediente5_label = Label(frame_preco, text="Sal Mineral")
     ingrediente5_label.grid(row=1, column=2, pady=10, padx=(10,0))
-    ingrediente5_entry = Entry(frame_simplex, state=DISABLED)
+    ingrediente5_entry = Entry(frame_preco, state=NORMAL)
     ingrediente5_entry.grid(row=1, column=3, pady=10)
+
+    #criando frame com os entrys da quantidade dos ingredientes
+    frame_quantidade = LabelFrame(root, text="Quantidade disponível em Kg")
+    frame_quantidade.pack(fill="x", pady=10, padx=10)
+
+    ingrediente11_label = Label(frame_quantidade, text="Soja")
+    ingrediente11_label.grid(row=0, column=0, pady=10, padx=(10,0))
+    ingrediente11_entry = Entry(frame_quantidade, state=NORMAL)
+    ingrediente11_entry.grid(row=0, column=1, pady=10)
+
+    ingrediente22_label = Label(frame_quantidade, text="Milho")
+    ingrediente22_label.grid(row=0, column=2, pady=10, padx=(10,0))
+    ingrediente22_entry = Entry(frame_quantidade, state=NORMAL)
+    ingrediente22_entry.grid(row=0, column=3, pady=10)
+
+    ingrediente33_label = Label(frame_quantidade, text="Cana")
+    ingrediente33_label.grid(row=0, column=4, pady=10, padx=(10,0))
+    ingrediente33_entry = Entry(frame_quantidade, state=NORMAL)
+    ingrediente33_entry.grid(row=0, column=5, pady=10)
+
+    ingrediente44_label = Label(frame_quantidade, text="Algodão")
+    ingrediente44_label.grid(row=1, column=0, pady=10, padx=(10,0))
+    ingrediente44_entry = Entry(frame_quantidade, state=NORMAL)
+    ingrediente44_entry.grid(row=1, column=1, pady=10)
+
+    ingrediente55_label = Label(frame_quantidade, text="Sal Mineral")
+    ingrediente55_label.grid(row=1, column=2, pady=10, padx=(10,0))
+    ingrediente55_entry = Entry(frame_quantidade, state=NORMAL)
+    ingrediente55_entry.grid(row=1, column=3, pady=10)
 
 
     frame_final = Frame(root)
