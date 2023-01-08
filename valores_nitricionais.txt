@@ -1,0 +1,45 @@
+Soja (100g):
+	calcio - 277mg
+	fósforo - 704mg
+	magnesio - 280mg
+	sodio - 2mg
+	potassio - 1800mg
+	colbalto - 0
+	cobre - 1.66mg
+	iodo - 0
+	ferro - 15.7mg
+	manganes - 2.52mg
+	selenio - 0.0178mg
+	zinco - 4.89mg
+	https://fdc.nal.usda.gov/fdc-app.html#/food-details/174270/nutrients
+
+milho (100g):
+	calcio - 1.6mg
+	fósforo - 112.7mg
+	magnesio - 32.6mg
+	sodio - 1.1mg
+	potassio - 184.4mg
+	colbalto - 0
+	cobre - 0.0001mg
+	iodo - 0
+	ferro - 0.4mg
+	manganes - 0.1mg
+	selenio - 0
+	zinco - 0.5mg
+	https://www.tabelanutricional.com.br/milho-verde-cru
+
+sal mineral (1000g):
+	calcio - 80g
+	fósforo - 65g
+	magnesio - 0g
+	sodio - 145g
+	potassio - 0g
+	colbalto - 44.5mg
+	cobre - 1200mg
+	iodo - 60mg
+	ferro - 1500mg
+	manganes - 1050mg
+	selenio - 10mg
+	zinco - 2880mg
+	https://www.agrosolo.com.br/produto/fosbovi%C2%AE-15-sal-mineral-suplemento-mineral-para-bovinos-de-corte-pronto-para-uso-30-kg-81389#:~:text=Cloreto%20de%20s%C3%B3dio%20(sal%20comum,de%20cobalto%3B%20Sulfato%20de%20cobre
+

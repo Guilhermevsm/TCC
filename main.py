@@ -57,6 +57,7 @@ def cria_menu():
     menu_principal.add_cascade(label="Views", menu=menu_views)
     menu_views.add_command(label="Animais Vacinados", command=janela_vacinados)
     menu_views.add_command(label="Decendentes", command=janela_filhos)
+    menu_views.add_command(label="Vender", command=janela_vender)
 
     menu_racao = Menu(menu_principal, tearoff=0)
     menu_principal.add_cascade(label="Ração", menu=menu_racao)
@@ -272,6 +273,18 @@ def query_database(tabela):
                 my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][1], dados[num][2], dados[num][3], dados[num][4], dados[num][5], dados[num][6], dados[num][7], dados[num][8], dados[num][9], dados[num][10], dados[num][11], dados[num][12], dados[num][13], dados[num][14], dados[num][15], dados[num][16], dados[num][17], dados[num][18]), tags=('evenrow', ))
             else:
                 my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][0], dados[num][1], dados[num][2], dados[num][3], dados[num][4], dados[num][5], dados[num][6], dados[num][7], dados[num][8], dados[num][9], dados[num][10], dados[num][11], dados[num][12], dados[num][13], dados[num][14], dados[num][15], dados[num][16], dados[num][17], dados[num][18]), tags=('oddrow', ))
+            num += 1
+
+    elif tabela == "vendas":   
+        cursor.execute("SELECT * FROM vendas")
+        dados = cursor.fetchall()
+        #print(dados)
+        num = 0
+        for itens in dados:
+            if num % 2 == 0:
+                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][1], dados[num][2], dados[num][3], dados[num][4], dados[num][5]), tags=('evenrow', ))
+            else:
+                my_tree.insert(parent='', index='end', iid=num, text='', values=(dados[num][1], dados[num][2], dados[num][3], dados[num][4], dados[num][5]), tags=('oddrow', ))
             num += 1
 
     #dando commit
@@ -994,25 +1007,28 @@ def janela_simplex():
         C = [ingrediente1_entry.get(), ingrediente2_entry.get(), ingrediente3_entry.get()]
         #Au é a matriz contendo os indices da equacoes condicionais do tipo MENOR IGUAL
         Au = [
-            [-3, -1, -3],
-            [1, -1, 0]
+            [-2.77, -0.016, -80],
+            [-7.04, -1.127, -65],
+            [-2.80, -0.326, 0],
+            [-0.02, -0.011, -145],
+            [-18, -1.844, 0]
         ]
-        #vetor b das equações de MENOR IGUAL
-        Bu = [-6, 1]
+        #vetor b das equações de MENOR IGUAL (gramas)
+        Bu = [-6.16, -7.04, -1.134, -2.41, -21.32]
         #Ae é a matriz contendo os indices das equações condicionais do tipo IGUALDADE
         Ae = [
-            [3, 2, 0]
+            [ingrediente11_entry.get(), ingrediente22_entry.get(), ingrediente33_entry.get()]
         ]
         #Vetor b das equações de IGUALDADE
-        Be = [6]
-        resultado = linprog(C, A_ub=Au, b_ub=Bu, A_eq=Ae, b_eq=Be, bounds=None, method='simplex')
-        #print(resultado)
+        Be = [1]
+        resultado = linprog(C, A_ub=Au, b_ub=Bu, A_eq=Ae, b_eq=Be, bounds=(0,1), method='simplex')
+        print(resultado)
         
         #fun é o valor otimizado
         # x: array são os valores de x que otimizão a função
         #nit é o numero de interções
 
-        resposta_label = Label(frame_final, text="Quantidade de ingrediente 1 = " + str(resultado['x'][0]) + " Kg\nQuantidade de ingrediente 2 = " + str(resultado['x'][1]) + " Kg\nQuantidade de ingrediente 3 = " + str(resultado['x'][2]) + " Kg")
+        resposta_label = Label(frame_final, text="Soja = " + str(resultado['x'][0]) + " Kg\nMilho = " + str(resultado['x'][1]) + " Kg\nSal Mineral = " + str(resultado['x'][2]) + " Kg")
         resposta_label.grid(row=1, column=1, columnspan=4, rowspan=3)
 
 
@@ -2753,6 +2769,152 @@ def janela_ingredientes():
 
 
 #-----------------------------------------------------------------------------------------
+
+#criando a janela para vender um animal
+def janela_vender():
+    #funcao para pegar todos animais no banco
+    def receber_animais():
+        try:
+            conexao = mysql.connector.connect(
+                host = "localhost",
+                user = "root",
+                passwd = "aneis1961",
+                database = "casima"
+            )
+            #criando o cursor
+            cursor = conexao.cursor()
+        except Error as e:
+            aviso = messagebox.showerror(title="ERRO", message="Erro na conexão com o banco! \nErro: " + str(e))
+    
+        cursor.execute("SELECT tag FROM animais")
+        resultado = cursor.fetchall()
+        return resultado
+
+    #funcao para vender o animal
+    def vender():
+        response = messagebox.askyesno(title="Vender",  message="Confirmar Venda?")
+        if response == 1:
+            try:
+                conexao = mysql.connector.connect(
+                    host = "localhost",
+                    user = "root",
+                    passwd = "aneis1961",
+                    database = "casima"
+                )
+                #criando o cursor
+                cursor = conexao.cursor()
+            except Error as e:
+                aviso = messagebox.showerror(title="ERRO", message="Erro na conexão com o banco! \nErro: " + str(e))
+        
+            sql = "INSERT INTO vendas (animal_venda, valor_venda, peso_venda, data, comprador_enda) VALUES (%s, %s, %s, %s, %s)"
+            valor = (str(animal_selecionado.get()), str(valor_entry.get()), str(peso_venda_entry.get()), str(datetime.date.today()), str(comprador_entry.get()))
+            cursor.execute(sql, valor)
+            
+            remover("animais", animal_selecionado.get())
+            
+            conexao.commit()
+            conexao.close()
+            
+
+    def ver_tabela():
+        for widgets in root.winfo_children():
+            widgets.destroy()
+        root.geometry("1200x600")
+        cria_menu()
+
+        #adicionando estilo
+        style = ttk.Style()
+        style.theme_use('default')
+        style.configure("Treeview", background="#D3D3D3", foreground="black", rowheight=25, fieldbackground="#D3D3D3")
+        style.map('Treeview', background=[('selected', "#347083")])
+
+        global my_tree
+
+        #criando frame da treeview
+        frame_vendas = Frame(root)
+        frame_vendas.pack(pady=10)
+
+        #criando o scroll da treeview
+        tree_scroll = Scrollbar(frame_vendas)
+        tree_scroll.pack(side=RIGHT, fill=Y)
+
+        #criando a treeview
+        my_tree = ttk.Treeview(frame_vendas, yscrollcommand=tree_scroll.set, selectmode="extended")
+        my_tree.pack()
+
+        #configurando o scroll
+        tree_scroll.config(command=my_tree.yview)
+
+        #difinindo as colunas
+        my_tree['columns'] = ("Animal", "Valor", "Peso", "Data", "Comprador")
+        my_tree.column("#0", width=0, stretch=NO)
+        my_tree.column("Animal", width=140, anchor=W)
+        my_tree.column("Valor", width=300, anchor=W)
+        my_tree.column("Peso", width=140, anchor=CENTER)
+        my_tree.column("Data", width=300, anchor=CENTER)
+        my_tree.column("Comprador", width=140, anchor=CENTER)
+        
+        #criando as headings
+        my_tree.heading("#0", text="", anchor=W)
+        my_tree.heading("Animal", text="Animal", anchor=W)
+        my_tree.heading("Valor", text="Valor", anchor=W)
+        my_tree.heading("Peso", text="Peso", anchor=CENTER)
+        my_tree.heading("Data", text="Data", anchor=CENTER)
+        my_tree.heading("Comprador", text="Comprador", anchor=CENTER)
+        
+        #alternando as cores das linhas
+        my_tree.tag_configure('oddrow', background="white")
+        my_tree.tag_configure('evenrow', background="lightblue")
+
+        query_database("vendas")
+        frame_vendas2 = Frame(root)
+        frame_vendas2.pack(pady=10)
+        botao_voltar = Button(frame_vendas2, text="Voltar", width=20, command=janela_vender)
+        botao_voltar.grid(row=0, column=0, padx=10, pady=10)
+
+
+
+    for widgets in root.winfo_children():
+        widgets.destroy()
+    root.geometry("1000x800")
+    cria_menu()
+
+
+    frame_vender = LabelFrame(root, text="Vender Animal")
+    frame_vender.pack(fill="x", expand="yes", padx=20)
+    
+    selecionar_animal_label = Label(frame_vender, text="Selecione o animal: ")
+    selecionar_animal_label.grid(row=0, column=0, padx=10, pady=10)
+    
+    animal_selecionado = StringVar()
+    selecionar_animal = ttk.Combobox(frame_vender, textvariable=animal_selecionado)
+    selecionar_animal['values'] = receber_animais()
+    selecionar_animal['state'] = 'readonly'
+    selecionar_animal.grid(row=0, column=1, padx=10, pady=10)
+
+    valor_label = Label(frame_vender, text="Valor/Kg: ")
+    valor_label.grid(row=0, column=2, padx=10, pady=10)
+    valor_entry = Entry(frame_vender)
+    valor_entry.grid(row=0, column=3, padx=10, pady=10)
+    
+    peso_venda_label = Label(frame_vender, text="Peso: ")
+    peso_venda_label.grid(row=0, column=4, padx=10, pady=10)
+    peso_venda_entry = Entry(frame_vender)
+    peso_venda_entry.grid(row=0, column=5, padx=10, pady=10)
+
+    comprador_label = Label(frame_vender, text="Comprador")
+    comprador_label.grid(row=1, column=0, padx=10, pady=10)
+    comprador_entry = Entry(frame_vender)
+    comprador_entry.grid(row=1, column=1, padx=10, pady=10)
+
+    botao_vender = Button(frame_vender, text="Vender", width=20, command=vender)
+    botao_vender.grid(row=1, column=2, padx=10, pady=10)
+
+    botao_visualizar = Button(frame_vender, text="Ver Vendas", width=20, command=ver_tabela)
+    botao_visualizar.grid(row=2, column=0, padx=10, pady=10)
+
+#-----------------------------------------------------------------------------------------
+
 
 
 cria_menu()

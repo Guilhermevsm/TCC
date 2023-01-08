@@ -25,7 +25,14 @@ except Error as e:
 
 
 
-cursor.execute("UPDATE animais SET tipo = 'Bovino'")
+cursor.execute("""CREATE TABLE IF NOT EXISTS vendas (
+        id_venda INT AUTO_INCREMENT PRIMARY KEY,
+        animal_venda INT(10) NOT NULL,
+        valor_venda INT(10) NOT NULL ,
+        peso_venda INT(10) NOT NULL ,
+        data DATE,
+        comprador_enda VARCHAR(255)
+        )""") 
 
 
 conexao.commit()
